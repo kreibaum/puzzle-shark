@@ -6,15 +6,18 @@ extends Node2D
 @onready var edge_shape = $EdgeShape
 
 # Called when the node enters the scene tree for the first time.
+# At this point, all other nodes already exist, even though they may not be
+# members of the scene tree yet.
 func _ready():
-	print(self, "is ready", left_handle, right_handle)
 	left_handle.position_changed.connect(update_position)
 	right_handle.position_changed.connect(update_position)
+	
+	# Initial alignment
 	update_position()
-	pass
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+# Called to set up the edge in the correct position and then again whenever one
+# of the handles moves.
 func update_position():
 	if left_handle == null or right_handle == null:
 		return
@@ -30,11 +33,12 @@ func update_position():
 	var target_length = target_baseline.length()
 	var target_angle = target_baseline.angle()
 	
-	# First, move left to 0.
-	# Transform2D(0, Vector2.ZERO, 0, -left)
 	var scale = Vector2(target_length / shape_length, target_length / shape_length)
-	var transform = Transform2D(target_angle - shape_angle, scale, 0, left_handle.position - left)
-	# var transform = Transform2D(target_angle - shape_angle, 0, 0, left_handle.position - left)
+	
+	# It is important that we first move
+	var zero_out = Transform2D(0, Vector2.ONE, 0, -left)
+	var transform = Transform2D(target_angle - shape_angle, scale, 0, left_handle.position) * zero_out
+	# var transform = Transform2D(target_angle - shape_angle, scale, 0, left_handle.position - left)
 	
 	self.transform = transform
 

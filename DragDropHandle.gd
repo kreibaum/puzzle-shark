@@ -28,3 +28,9 @@ func _input_event(_viewport, event, _shape_index):
 				is_dragging = true
 			else:
 				is_dragging = false
+
+func _mouse_enter():
+	$Polygon2D.color = "eb00cf"
+	
+func _mouse_exit():
+	$Polygon2D.color = "ad40a0"
