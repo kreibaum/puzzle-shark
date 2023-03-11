@@ -9,3 +9,4 @@ right_handle = NodePath("")
 
 [node name="EdgeShape" type="Line2D" parent="."]
 points = PackedVector2Array(0, 20, 98, -5, 69, -46, 90, -80, 142, -56, 143, -1, 232, -20)
+width = 3.0

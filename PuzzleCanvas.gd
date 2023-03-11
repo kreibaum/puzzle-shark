@@ -17,6 +17,7 @@ func _ready():
 			points[Vector2i(x, y)] = handle
 			handle.position = Vector2(200 * x, 200 * y)
 			handle.z_index = 2
+			handle.camera = camera
 			add_child(handle)
 	
 	for x in range(1, w):
@@ -24,6 +25,7 @@ func _ready():
 			var edge : Edge = edge_scene.instantiate()
 			edge.left_handle = points[Vector2i(x-1, y)]
 			edge.right_handle = points[Vector2i(x, y)]
+			edge.camera = camera
 			add_child(edge)
 	
 	for x in range(0, w):
@@ -31,6 +33,7 @@ func _ready():
 			var edge : Edge = edge_scene.instantiate()
 			edge.left_handle = points[Vector2i(x, y-1)]
 			edge.right_handle = points[Vector2i(x, y)]
+			edge.camera = camera
 			add_child(edge)
 
 

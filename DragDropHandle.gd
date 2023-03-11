@@ -3,11 +3,13 @@ class_name DragDropHandle extends Area2D
 var drag_offset : Vector2 = Vector2(0, 0)
 var is_dragging : bool = false
 
+@export var camera: Camera2D
+
 signal position_changed
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.s
+	camera.zoom_changed.connect(update_zoom)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -41,3 +43,6 @@ func _mouse_enter():
 	
 func _mouse_exit():
 	$Polygon2D.color = "ad40a0"
+
+func update_zoom(zoom):
+	self.scale = Vector2(1/zoom.x, 1/zoom.y)

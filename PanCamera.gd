@@ -1,5 +1,7 @@
 extends Camera2D
 
+signal zoom_changed(float)
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -27,3 +29,4 @@ func zoom_at_mouse(zoom_change:float):
 	var mouse_new = get_global_mouse_position()
 	var relative = mouse_new - mouse_old
 	self.position -= relative 
+	zoom_changed.emit(self.zoom)

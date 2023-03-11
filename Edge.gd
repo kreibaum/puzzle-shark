@@ -3,12 +3,16 @@ class_name Edge extends Node2D
 @export var left_handle : DragDropHandle
 @export var right_handle : DragDropHandle
 
+@export var camera: Camera2D
+
 var template_points
 
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
+	camera.zoom_changed.connect(update_zoom)
+	
 	left_handle.position_changed.connect(update_position)
 	right_handle.position_changed.connect(update_position)
 	
@@ -41,4 +45,6 @@ func build_transformation_matrix() -> Transform2D:
 	# It is important that we first move
 	var zero_out = Transform2D(0, Vector2.ONE, 0, -left)
 	return Transform2D(target_angle - shape_angle, scale_vector, 0, left_handle.position) * zero_out
-	
+
+func update_zoom(zoom):
+	$EdgeShape.width = 3/zoom.x
