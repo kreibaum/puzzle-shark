@@ -10,7 +10,7 @@ script = ExtResource("1_y76fk")
 camera = NodePath("")
 
 [node name="Selection" type="Area2D" parent="."]
-z_index = 4
+z_index = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Selection"]
 position = Vector2(0.5, 0.5)

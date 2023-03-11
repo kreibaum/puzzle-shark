@@ -45,11 +45,12 @@ func _unhandled_input(event):
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				is_selecting = true
-				self.selection_start = get_global_mouse_position()
+				selection_start = get_global_mouse_position()
+				selection_end = selection_start
 				$Selection.show()
+				update_selection()
 			else:
-				is_selecting = false
-			update_selection()
+				clear_selection()
 				
 	elif event is InputEventMouseMotion:
 		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
@@ -59,6 +60,19 @@ func _unhandled_input(event):
 func update_selection():
 	if is_selecting:
 		$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
-		print($Selection.get_overlapping_areas())
+		for handle in points.values():
+			handle.in_selection = false
+		for area in $Selection.get_overlapping_areas():
+			if area is DragDropHandle:
+				area.in_selection = true
 	else:
 		$Selection.hide()
+
+func clear_selection():
+	is_selecting = false
+	selection_start = Vector2.INF
+	selection_end = Vector2.INF
+	$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
+	for handle in points.values():
+		handle.in_selection = false
+	

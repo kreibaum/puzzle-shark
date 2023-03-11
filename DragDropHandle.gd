@@ -2,6 +2,11 @@ class_name DragDropHandle extends Area2D
 
 var drag_offset : Vector2 = Vector2(0, 0)
 var is_dragging : bool = false
+var hovered : bool = false
+var in_selection : bool = false : 
+	set(value):
+		in_selection = value
+		update_color()
 
 @export var camera: Camera2D
 
@@ -39,10 +44,18 @@ func _input_event(_viewport, event, _shape_index):
 				is_dragging = false
 
 func _mouse_enter():
-	$Polygon2D.color = "eb00cf"
+	hovered = true
+	update_color()
 	
 func _mouse_exit():
-	$Polygon2D.color = "ad40a0"
+	hovered = false
+	update_color()
+
+func update_color():
+	if hovered or in_selection:
+		$Polygon2D.color = "eb00cf"
+	else:
+		$Polygon2D.color = "ad40a0"
 
 func update_zoom(zoom):
 	self.scale = Vector2(1/zoom.x, 1/zoom.y)
