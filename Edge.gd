@@ -1,4 +1,4 @@
-extends Node2D
+class_name Edge extends Node2D
 
 @export var left_handle : DragDropHandle
 @export var right_handle : DragDropHandle

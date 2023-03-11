@@ -1,41 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://caibbyl7lcvdq"]
+[gd_scene load_steps=3 format=3 uid="uid://caibbyl7lcvdq"]
 
-[ext_resource type="PackedScene" uid="uid://cn3kxsu5ihpvc" path="res://drag_drop_handle.tscn" id="1_8a1gt"]
 [ext_resource type="Script" path="res://PanCamera.gd" id="1_8jika"]
-[ext_resource type="PackedScene" uid="uid://cd6yd5nld4ven" path="res://edge.tscn" id="1_a5pmm"]
+[ext_resource type="Script" path="res://PuzzleCanvas.gd" id="2_0yr3o"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="Camera2D" type="Camera2D" parent="."]
-offset = Vector2(577, 320)
+offset = Vector2(500, 220)
 script = ExtResource("1_8jika")
 
 [node name="PuzzleCanvas" type="Node2D" parent="."]
-
-[node name="Edge 1" parent="PuzzleCanvas" node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
-left_handle = NodePath("../Handle A")
-right_handle = NodePath("../Handle B")
-
-[node name="Edge 2" parent="PuzzleCanvas" node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
-left_handle = NodePath("../Handle C")
-right_handle = NodePath("../Handle B")
-
-[node name="Edge 3" parent="PuzzleCanvas" node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
-left_handle = NodePath("../Handle C")
-right_handle = NodePath("../Handle D")
-
-[node name="Edge 4" parent="PuzzleCanvas" node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
-left_handle = NodePath("../Handle A")
-right_handle = NodePath("../Handle D")
-
-[node name="Handle A" parent="PuzzleCanvas" instance=ExtResource("1_8a1gt")]
-position = Vector2(322, 218)
-
-[node name="Handle B" parent="PuzzleCanvas" instance=ExtResource("1_8a1gt")]
-position = Vector2(633, 225)
-
-[node name="Handle C" parent="PuzzleCanvas" instance=ExtResource("1_8a1gt")]
-position = Vector2(641, 475)
-
-[node name="Handle D" parent="PuzzleCanvas" instance=ExtResource("1_8a1gt")]
-position = Vector2(438, 454)
+script = ExtResource("2_0yr3o")
