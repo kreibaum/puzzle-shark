@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://caibbyl7lcvdq"]
 
 [ext_resource type="Script" path="res://PanCamera.gd" id="1_8jika"]
-[ext_resource type="Script" path="res://PuzzleCanvas.gd" id="2_0yr3o"]
+[ext_resource type="PackedScene" uid="uid://dlgf7q63selrp" path="res://puzzle_canvas.tscn" id="2_hetub"]
 [ext_resource type="Texture2D" uid="uid://dxt53gumvtia8" path="res://Pulau_Padar.jpg" id="3_21ddy"]
 
 [node name="Node2D" type="Node2D"]
@@ -10,8 +10,7 @@
 offset = Vector2(500, 220)
 script = ExtResource("1_8jika")
 
-[node name="PuzzleCanvas" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
-script = ExtResource("2_0yr3o")
+[node name="PuzzleCanvas" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_hetub")]
 camera = NodePath("../Camera2D")
 
 [node name="BackgroundImage" type="Sprite2D" parent="."]
