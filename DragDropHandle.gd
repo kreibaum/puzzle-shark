@@ -1,4 +1,4 @@
-extends Polygon2D
+extends Area2D
 
 var drag_offset : Vector2 = Vector2(0, 0)
 var is_dragging : bool = false
@@ -14,8 +14,7 @@ func _process(delta):
 		self.position = mouse_at + drag_offset;
 
 # Called when the mouse is pressed
-func _unhandled_input(event):
-	print(event)
+func _input_event(_viewport, event, _shape_index):
 	if event is InputEventMouseButton:
 		if event.button_index == 1:
 			if event.pressed:
