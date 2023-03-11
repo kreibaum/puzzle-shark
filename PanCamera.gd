@@ -9,6 +9,10 @@ func _process(delta):
 	pass
 
 func _unhandled_input(event):
+	# Disable the camera when pressing ctrl
+	if Input.is_key_pressed(KEY_CTRL):
+		return
+	
 	if event is InputEventMouseMotion:
 		if event.button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 			self.position -= event.relative / self.zoom

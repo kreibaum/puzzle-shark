@@ -13,10 +13,17 @@ func _ready():
 func _process(delta):
 	if is_dragging:
 		var mouse_at = get_global_mouse_position()
-		var new_position = mouse_at + drag_offset
-		if self.position != new_position:
-			self.position = new_position
-			position_changed.emit()
+		move_to(mouse_at + drag_offset)
+
+# Sets the position and triggers the signal so dependent objects can update.
+func move_to(new_position):
+	if self.position != new_position:
+		self.position = new_position
+		position_changed.emit()
+
+func transform(transformation: Transform2D):
+	self.position = transformation * self.position
+	position_changed.emit()
 
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):

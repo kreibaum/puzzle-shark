@@ -3,11 +3,14 @@ extends Node2D
 var handle_scene = preload("res://drag_drop_handle.tscn")
 var edge_scene = preload("res://edge.tscn")
 
+@export var camera: Camera2D
+
+var points = {}
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var w = 5
 	var h = 3
-	var points = {}
 	for x in range(0, w):
 		for y in range(0, h):
 			var handle = handle_scene.instantiate()
@@ -29,4 +32,6 @@ func _ready():
 			edge.left_handle = points[Vector2i(x, y-1)]
 			edge.right_handle = points[Vector2i(x, y)]
 			add_child(edge)
+
+
 
