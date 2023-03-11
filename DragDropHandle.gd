@@ -16,7 +16,7 @@ func _process(delta):
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):
 	if event is InputEventMouseButton:
-		if event.button_index == 1:
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				var mouse_at = get_global_mouse_position()
 				drag_offset = self.position - mouse_at

@@ -1,18 +1,17 @@
 [gd_scene load_steps=3 format=3 uid="uid://caibbyl7lcvdq"]
 
-[ext_resource type="Script" path="res://DragDropHandle.gd" id="1_q22l8"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vw7v3"]
+[ext_resource type="PackedScene" uid="uid://cn3kxsu5ihpvc" path="res://drag_drop_handle.tscn" id="1_8a1gt"]
+[ext_resource type="Script" path="res://Edge.gd" id="2_vlnjb"]
 
 [node name="Node2D" type="Node2D"]
 
-[node name="DragDropHandle" type="Area2D" parent="."]
-position = Vector2(400, 200)
-script = ExtResource("1_q22l8")
+[node name="Edge" type="Node2D" parent="."]
+script = ExtResource("2_vlnjb")
 
-[node name="Polygon2D" type="Polygon2D" parent="DragDropHandle"]
-color = Color(0.678431, 0.25098, 0.627451, 1)
-polygon = PackedVector2Array(-10, -10, 10, -10, 10, 10, -10, 10)
+[node name="EdgeShape" type="Line2D" parent="Edge"]
+points = PackedVector2Array(-2, 4, 98, -5, 69, -46, 90, -80, 142, -56, 143, -1, 232, 1)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DragDropHandle"]
-shape = SubResource("RectangleShape2D_vw7v3")
+[node name="Handle A" parent="." instance=ExtResource("1_8a1gt")]
+
+[node name="Handle B" parent="." instance=ExtResource("1_8a1gt")]
+position = Vector2(800, 400)
