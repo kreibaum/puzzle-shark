@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cd6yd5nld4ven"]
+
+[ext_resource type="Script" path="res://Edge.gd" id="1_x5v5a"]
+
+[node name="Edge" type="Node2D" node_paths=PackedStringArray("left_handle", "right_handle")]
+script = ExtResource("1_x5v5a")
+left_handle = NodePath("")
+right_handle = NodePath("")
+
+[node name="EdgeShape" type="Line2D" parent="."]
+points = PackedVector2Array(-2, 4, 98, -5, 69, -46, 90, -80, 142, -56, 143, -1, 232, 1)

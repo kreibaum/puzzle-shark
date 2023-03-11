@@ -1,7 +1,9 @@
-extends Area2D
+class_name DragDropHandle extends Area2D
 
 var drag_offset : Vector2 = Vector2(0, 0)
 var is_dragging : bool = false
+
+signal position_changed
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -11,7 +13,10 @@ func _ready():
 func _process(delta):
 	if is_dragging:
 		var mouse_at = get_global_mouse_position()
-		self.position = mouse_at + drag_offset;
+		var new_position = mouse_at + drag_offset
+		if self.position != new_position:
+			self.position = new_position
+			position_changed.emit()
 
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):

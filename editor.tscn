@@ -1,17 +1,34 @@
 [gd_scene load_steps=3 format=3 uid="uid://caibbyl7lcvdq"]
 
 [ext_resource type="PackedScene" uid="uid://cn3kxsu5ihpvc" path="res://drag_drop_handle.tscn" id="1_8a1gt"]
-[ext_resource type="Script" path="res://Edge.gd" id="2_vlnjb"]
+[ext_resource type="PackedScene" uid="uid://cd6yd5nld4ven" path="res://edge.tscn" id="1_a5pmm"]
 
 [node name="Node2D" type="Node2D"]
 
-[node name="Edge" type="Node2D" parent="."]
-script = ExtResource("2_vlnjb")
+[node name="Edge 1" parent="." node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
+left_handle = NodePath("../Handle A")
+right_handle = NodePath("../Handle B")
 
-[node name="EdgeShape" type="Line2D" parent="Edge"]
-points = PackedVector2Array(-2, 4, 98, -5, 69, -46, 90, -80, 142, -56, 143, -1, 232, 1)
+[node name="Edge 2" parent="." node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
+left_handle = NodePath("../Handle C")
+right_handle = NodePath("../Handle B")
+
+[node name="Edge 3" parent="." node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
+left_handle = NodePath("../Handle C")
+right_handle = NodePath("../Handle D")
+
+[node name="Edge 4" parent="." node_paths=PackedStringArray("left_handle", "right_handle") instance=ExtResource("1_a5pmm")]
+left_handle = NodePath("../Handle A")
+right_handle = NodePath("../Handle D")
 
 [node name="Handle A" parent="." instance=ExtResource("1_8a1gt")]
+position = Vector2(322, 218)
 
 [node name="Handle B" parent="." instance=ExtResource("1_8a1gt")]
-position = Vector2(800, 400)
+position = Vector2(633, 225)
+
+[node name="Handle C" parent="." instance=ExtResource("1_8a1gt")]
+position = Vector2(641, 475)
+
+[node name="Handle D" parent="." instance=ExtResource("1_8a1gt")]
+position = Vector2(438, 454)
