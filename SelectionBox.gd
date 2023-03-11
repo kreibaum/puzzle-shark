@@ -45,16 +45,15 @@ func _update_selection():
 	if !is_selecting:
 		hide()
 
-
 func _process(_delta):
 	# For performance reasons collisions are all processed at the same time.
 	# This means updating the selection must happen defered.
 	if selection_needs_update > 0:
 		for handle in current_selection:
-			if "in_selection" in handle:
-				handle.in_selection = false
+			if "in_selection_box" in handle:
+				handle.in_selection_box = false
 		current_selection = get_overlapping_areas()
 		for handle in current_selection:
-			if "in_selection" in handle:
-				handle.in_selection = true
+			if "in_selection_box" in handle:
+				handle.in_selection_box = true
 		selection_needs_update -= 1
