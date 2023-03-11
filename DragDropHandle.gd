@@ -11,6 +11,7 @@ var in_selection : bool = false :
 @export var camera: Camera2D
 
 signal position_changed
+signal hover_changed(DragDropHandle)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -46,10 +47,12 @@ func _input_event(_viewport, event, _shape_index):
 func _mouse_enter():
 	hovered = true
 	update_color()
+	hover_changed.emit(self)
 	
 func _mouse_exit():
 	hovered = false
 	update_color()
+	hover_changed.emit(self)
 
 func update_color():
 	if hovered or in_selection:

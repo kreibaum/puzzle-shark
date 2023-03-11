@@ -10,6 +10,9 @@ var points = {}
 var is_selecting: bool = false
 var selection_start: Vector2
 var selection_end: Vector2
+var selection_needs_update: int = 0
+
+var current_hover = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -22,6 +25,7 @@ func _ready():
 			handle.position = Vector2(200 * x, 200 * y)
 			handle.z_index = 2
 			handle.camera = camera
+			handle.hover_changed.connect(current_hover_changed)
 			add_child(handle)
 	
 	for x in range(1, w):
@@ -40,10 +44,27 @@ func _ready():
 			edge.camera = camera
 			add_child(edge)
 
+func current_hover_changed(handle: DragDropHandle):
+	if !handle.hovered:
+		current_hover = null
+	else:
+		current_hover = handle
+
+func _process(_delta):
+	# For performance reasons collisions are all processed at the same time.
+	# This means updating the selection must happen defered.
+	if selection_needs_update > 0:
+		for handle in points.values():
+			handle.in_selection = false
+		for area in $Selection.get_overlapping_areas():
+			if area is DragDropHandle:
+				area.in_selection = true
+		selection_needs_update -= 1
+
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
+			if event.pressed and current_hover == null:
 				is_selecting = true
 				selection_start = get_global_mouse_position()
 				selection_end = selection_start
@@ -60,19 +81,14 @@ func _unhandled_input(event):
 func update_selection():
 	if is_selecting:
 		$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
-		for handle in points.values():
-			handle.in_selection = false
-		for area in $Selection.get_overlapping_areas():
-			if area is DragDropHandle:
-				area.in_selection = true
 	else:
 		$Selection.hide()
+	selection_needs_update = 2
 
 func clear_selection():
 	is_selecting = false
 	selection_start = Vector2.INF
 	selection_end = Vector2.INF
 	$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
-	for handle in points.values():
-		handle.in_selection = false
-	
+	selection_needs_update = 2
+
