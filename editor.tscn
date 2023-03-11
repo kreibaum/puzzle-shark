@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://caibbyl7lcvdq"]
+
+[ext_resource type="Script" path="res://DragDropHandle.gd" id="1_q22l8"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2(400, 250)
+color = Color(0.678431, 0.25098, 0.627451, 1)
+polygon = PackedVector2Array(0, 0, 20, 0, 20, 20, 0, 20)
+script = ExtResource("1_q22l8")
