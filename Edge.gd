@@ -3,8 +3,6 @@ extends Node2D
 @export var left_handle : DragDropHandle
 @export var right_handle : DragDropHandle
 
-@onready var edge_shape = $EdgeShape
-
 var template_points
 
 # Called when the node enters the scene tree for the first time.
@@ -24,13 +22,11 @@ func _ready():
 # Called to set up the edge in the correct position and then again whenever one
 # of the handles moves.
 func update_position():
-	var transformation_matrix = build_transformation_matrix()
-	print(self.template_points, transformation_matrix * self.template_points)
-	$EdgeShape.points = transformation_matrix * self.template_points
+	$EdgeShape.points = build_transformation_matrix() * self.template_points
 
 func build_transformation_matrix() -> Transform2D:
 	var left : Vector2 = template_points[0]
-	var right : Vector2 = template_points[edge_shape.get_point_count()-1]
+	var right : Vector2 = template_points[$EdgeShape.get_point_count()-1]
 	
 	var baseline = right - left
 	var shape_length = baseline.length()
