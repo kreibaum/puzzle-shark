@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dlgf7q63selrp"]
+[gd_scene load_steps=4 format=3 uid="uid://dlgf7q63selrp"]
 
 [ext_resource type="Script" path="res://PuzzleCanvas.gd" id="1_y76fk"]
+[ext_resource type="Script" path="res://SelectionBox.gd" id="2_yor7s"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_awmdd"]
 size = Vector2(1, 1)
@@ -9,13 +10,14 @@ size = Vector2(1, 1)
 script = ExtResource("1_y76fk")
 camera = NodePath("")
 
-[node name="Selection" type="Area2D" parent="."]
+[node name="SelectionBox" type="Area2D" parent="."]
 z_index = 2
+script = ExtResource("2_yor7s")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Selection"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SelectionBox"]
 position = Vector2(0.5, 0.5)
 shape = SubResource("RectangleShape2D_awmdd")
 
-[node name="Polygon2D" type="Polygon2D" parent="Selection"]
+[node name="Polygon2D" type="Polygon2D" parent="SelectionBox"]
 color = Color(0.823529, 0.25098, 1, 0.439216)
 polygon = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)

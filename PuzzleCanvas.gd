@@ -7,11 +7,6 @@ var edge_scene = preload("res://edge.tscn")
 
 var points = {}
 
-var is_selecting: bool = false
-var selection_start: Vector2
-var selection_end: Vector2
-var selection_needs_update: int = 0
-
 var current_hover = null
 
 # Called when the node enters the scene tree for the first time.
@@ -50,45 +45,16 @@ func current_hover_changed(handle: DragDropHandle):
 	else:
 		current_hover = handle
 
-func _process(_delta):
-	# For performance reasons collisions are all processed at the same time.
-	# This means updating the selection must happen defered.
-	if selection_needs_update > 0:
-		for handle in points.values():
-			handle.in_selection = false
-		for area in $Selection.get_overlapping_areas():
-			if area is DragDropHandle:
-				area.in_selection = true
-		selection_needs_update -= 1
-
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed and current_hover == null:
-				is_selecting = true
-				selection_start = get_global_mouse_position()
-				selection_end = selection_start
-				$Selection.show()
-				update_selection()
+				$SelectionBox.start_selection()
 			else:
-				clear_selection()
+				$SelectionBox.end_selection()
 				
 	elif event is InputEventMouseMotion:
 		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
-			self.selection_end = get_global_mouse_position()
-			update_selection()
+			$SelectionBox.move_selection()
 
-func update_selection():
-	if is_selecting:
-		$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
-	else:
-		$Selection.hide()
-	selection_needs_update = 2
-
-func clear_selection():
-	is_selecting = false
-	selection_start = Vector2.INF
-	selection_end = Vector2.INF
-	$Selection.transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
-	selection_needs_update = 2
 
