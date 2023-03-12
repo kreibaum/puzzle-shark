@@ -1,14 +1,14 @@
 class_name DragDropHandle extends Area2D
 
-var drag_offset : Vector2 = Vector2(0, 0)
-var is_dragging : bool = false
-var hovered : bool = false
-var selected : bool = false: 
+var drag_offset: Vector2 = Vector2(0, 0)
+var is_dragging: bool = false
+var hovered: bool = false
+var selected: bool = false:
 	set(value):
 		selected = value
 		update_color()
-		
-var in_selection_box : bool = false : 
+
+var in_selection_box: bool = false:
 	set(value):
 		in_selection_box = value
 		update_color()
@@ -19,15 +19,18 @@ signal position_changed
 signal hover_changed(DragDropHandle)
 signal was_clicked(DragDropHandle)
 
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	camera.zoom_changed.connect(update_zoom)
 
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if is_dragging:
 		var mouse_at = get_global_mouse_position()
 		move_to(mouse_at + drag_offset)
+
 
 # Sets the position and triggers the signal so dependent objects can update.
 func move_to(new_position):
@@ -35,9 +38,11 @@ func move_to(new_position):
 		self.position = new_position
 		position_changed.emit()
 
+
 func transform(transformation: Transform2D):
 	self.position = transformation * self.position
 	position_changed.emit()
+
 
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):
@@ -51,15 +56,18 @@ func _input_event(_viewport, event, _shape_index):
 				is_dragging = false
 				was_clicked.emit(self)
 
+
 func _mouse_enter():
 	hovered = true
 	update_color()
 	hover_changed.emit(self)
-	
+
+
 func _mouse_exit():
 	hovered = false
 	update_color()
 	hover_changed.emit(self)
+
 
 func update_color():
 	if selected:
@@ -69,5 +77,6 @@ func update_color():
 	else:
 		$Polygon2D.color = "ad40a0"
 
+
 func update_zoom(zoom):
-	self.scale = Vector2(1/zoom.x, 1/zoom.y)
+	self.scale = Vector2(1 / zoom.x, 1 / zoom.y)

@@ -2,31 +2,35 @@ extends Camera2D
 
 signal zoom_changed(float)
 
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	pass  # Replace with function body.
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	pass
+
 
 func _unhandled_input(event):
 	# Disable the camera when pressing ctrl
 	if Input.is_key_pressed(KEY_CTRL):
 		return
-	
+
 	if event is InputEventMouseMotion:
 		if event.button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 			self.position -= event.relative / self.zoom
 	elif event.is_action_pressed("ZoomIn"):
 		zoom_at_mouse(0.9)
 	elif event.is_action_pressed("ZoomOut"):
-		zoom_at_mouse(1.0/0.9)
+		zoom_at_mouse(1.0 / 0.9)
 
-func zoom_at_mouse(zoom_change:float):
+
+func zoom_at_mouse(zoom_change: float):
 	var mouse_old = get_global_mouse_position()
 	self.zoom *= zoom_change
 	var mouse_new = get_global_mouse_position()
 	var relative = mouse_new - mouse_old
-	self.position -= relative 
+	self.position -= relative
 	zoom_changed.emit(self.zoom)

@@ -11,9 +11,11 @@ var selection_start: Vector2
 var selection_end: Vector2
 var selection_needs_update: int = 0
 
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	pass  # Replace with function body.
+
 
 ## Start using the SelectionBox at the current mouse position.
 func start_selection():
@@ -23,11 +25,13 @@ func start_selection():
 	_update_selection()
 	show()
 
+
 ## Called for each mouse motion while the selection is active
 func move_selection():
 	if is_selecting:
 		selection_end = get_global_mouse_position()
 		_update_selection()
+
 
 ## Hides and closes the SelectionBox
 func end_selection():
@@ -37,13 +41,15 @@ func end_selection():
 	_update_selection()
 	selection_needs_update = 2
 
+
 # Update collider & visual elements of the SelectionBox.
 func _update_selection():
 	transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
 	selection_needs_update = 2
-	
+
 	if !is_selecting:
 		hide()
+
 
 func _process(_delta):
 	# For performance reasons collisions are all processed at the same time.

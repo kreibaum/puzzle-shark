@@ -8,7 +8,8 @@ var edge_scene = preload("res://edge.tscn")
 var points = {}
 
 var current_hover = null
-var current_selection:Array = Array()
+var current_selection: Array = Array()
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -24,22 +25,23 @@ func _ready():
 			handle.hover_changed.connect(current_hover_changed)
 			handle.was_clicked.connect(handle_was_clicked)
 			add_child(handle)
-	
+
 	for x in range(1, w):
 		for y in range(0, h):
-			var edge : Edge = edge_scene.instantiate()
-			edge.left_handle = points[Vector2i(x-1, y)]
+			var edge: Edge = edge_scene.instantiate()
+			edge.left_handle = points[Vector2i(x - 1, y)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
 			add_child(edge)
-	
+
 	for x in range(0, w):
 		for y in range(1, h):
-			var edge : Edge = edge_scene.instantiate()
-			edge.left_handle = points[Vector2i(x, y-1)]
+			var edge: Edge = edge_scene.instantiate()
+			edge.left_handle = points[Vector2i(x, y - 1)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
 			add_child(edge)
+
 
 func current_hover_changed(handle: DragDropHandle):
 	if !handle.hovered:
@@ -47,7 +49,8 @@ func current_hover_changed(handle: DragDropHandle):
 	else:
 		current_hover = handle
 
-func handle_was_clicked(handle:DragDropHandle):
+
+func handle_was_clicked(handle: DragDropHandle):
 	print(handle)
 	# This behaves a lot differently, depending on if you are in "shift mode"
 	# where selection is additive.
@@ -66,6 +69,7 @@ func handle_was_clicked(handle:DragDropHandle):
 		current_selection.append(handle)
 		handle.selected = true
 
+
 func selection_box_finished(handles: Array):
 	print("Selection box finished", handles)
 	# This behaves a lot differently, depending on if you are in "shift mode"
@@ -83,6 +87,7 @@ func selection_box_finished(handles: Array):
 		for handle in handles:
 			handle.selected = true
 
+
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -91,9 +96,7 @@ func _unhandled_input(event):
 			elif $SelectionBox.is_selecting:
 				selection_box_finished($SelectionBox.current_selection)
 				$SelectionBox.end_selection()
-				
+
 	elif event is InputEventMouseMotion:
 		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 			$SelectionBox.move_selection()
-
-
