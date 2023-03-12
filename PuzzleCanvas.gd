@@ -8,7 +8,14 @@ var edge_scene = preload("res://edge.tscn")
 var points = {}
 
 var current_hover = null
-var current_selection: Array = Array()
+
+# We can only use a dictionary, there are no dedicated sets.
+# The actual value does not matter.
+## The set of currently selected handles.
+var current_selection: Dictionary = Dictionary()
+
+# Variables related to dragging. INF means we are not dragging.
+var drag_start: Vector2 = Vector2.INF
 
 
 # Called when the node enters the scene tree for the first time.
@@ -22,8 +29,11 @@ func _ready():
 			handle.position = Vector2(200 * x, 200 * y)
 			handle.z_index = 2
 			handle.camera = camera
-			handle.hover_changed.connect(current_hover_changed)
-			handle.was_clicked.connect(handle_was_clicked)
+
+			# Since all events potentially affect multiple handles, we delegate
+			# the events to the canvas (Self), which can then handle them.
+			handle.captured_input_event.connect(handle_delegated_input_event)
+			handle.captured_hover_event.connect(handle_delegated_hover_event)
 			add_child(handle)
 
 	for x in range(1, w):
@@ -43,60 +53,129 @@ func _ready():
 			add_child(edge)
 
 
-func current_hover_changed(handle: DragDropHandle):
+func handle_delegated_input_event(handle: DragDropHandle, event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				# We are now dragging.
+				drag_start = get_global_mouse_position()
+			else:
+				# Is this adding to the selection?
+				if is_additive_selection():
+					if current_selection.has(handle):
+						deselect(handle)
+					else:
+						select(handle)
+				else:
+					# Exclusive mode, so we deselect everything else.
+					deselect_all()
+					select(handle)
+				
+				handle_mouse_release()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			# Rollback the drag.
+			drag_start = Vector2.INF
+			for any_handle in current_selection:
+				any_handle.rollback_drag()
+
+			# Remove the selection box without effect.
+			$SelectionBox.end_selection()
+
+	elif event is InputEventMouseMotion:
+		handle_mouse_motion(event)
+
+
+## Handles mouse motion based on the global mouse position.
+func handle_mouse_motion(event: InputEventMouseMotion):
+	if drag_start != Vector2.INF:
+		# We are dragging, so we need to move all selected handles.
+		var delta = get_global_mouse_position() - drag_start
+		apply_on_selection(func(handle): handle.preview_drag(delta))
+
+	if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
+		$SelectionBox.move_selection()
+
+func apply_on_selection(fkt):
+	for any_handle in current_selection:
+		fkt.call(any_handle)
+	if current_hover != null and current_hover not in current_selection:
+		fkt.call(current_hover)
+
+## Handles release of the left mouse button.
+func handle_mouse_release():
+	# Are we dragging? If so, we need to commit the drag.
+	if drag_start != Vector2.INF:
+		var delta = get_global_mouse_position() - drag_start
+		apply_on_selection(func(handle): handle.commit_drag(delta))
+		drag_start = Vector2.INF
+
+	# We also commit the selection box, if we have one:
+	if $SelectionBox.is_selecting:
+		# Is this adding to the selection?
+		if !is_additive_selection():
+			# Exclusive mode, so we deselect everything else.
+			deselect_all()
+
+		for handle in $SelectionBox.current_selection:
+			select(handle)
+
+		$SelectionBox.end_selection()
+
+
+func handle_delegated_hover_event(handle: DragDropHandle, is_hovering: bool):
+	# TODO: This does not handle overlapping handles in a great way.
+
+	# If we are already hovering something, we don't want to change that.
+	if current_hover != null and handle != current_hover:
+		return
+
+	handle.hovered = is_hovering
+
+	# Our state machine should remember what we are currently hovering.
 	if !handle.hovered:
 		current_hover = null
 	else:
 		current_hover = handle
 
 
-func handle_was_clicked(handle: DragDropHandle):
-	print(handle)
-	# This behaves a lot differently, depending on if you are in "shift mode"
-	# where selection is additive.
-	var selection_index = current_selection.find(handle)
-	if Input.is_key_pressed(KEY_SHIFT):
-		if selection_index >= 0:
-			current_selection.remove_at(selection_index)
-			handle.selected = false
-		else:
-			current_selection.append(handle)
-			handle.selected = true
-	elif selection_index < 0:
-		for other_handle in current_selection:
-			other_handle.selected = false
-		current_selection.clear()
-		current_selection.append(handle)
-		handle.selected = true
-
-
-func selection_box_finished(handles: Array):
-	print("Selection box finished", handles)
-	# This behaves a lot differently, depending on if you are in "shift mode"
-	# where selection is additive.
-	if Input.is_key_pressed(KEY_SHIFT):
-		for handle in handles:
-			if current_selection.find(handle) < 0:
-				current_selection.append(handle)
-				handle.selected = true
-	else:
-		for other_handle in current_selection:
-			other_handle.selected = false
-		current_selection.clear()
-		current_selection.append_array(handles)
-		for handle in handles:
-			handle.selected = true
-
-
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed and current_hover == null:
-				$SelectionBox.start_selection()
-			elif $SelectionBox.is_selecting:
-				selection_box_finished($SelectionBox.current_selection)
-				$SelectionBox.end_selection()
+			if event.pressed:
+				if current_hover == null:
+					$SelectionBox.start_selection()
+			else:
+				handle_mouse_release()
+
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			# Remove the selection box without effect.
+			$SelectionBox.end_selection()
 
 	elif event is InputEventMouseMotion:
-		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
-			$SelectionBox.move_selection()
+		handle_mouse_motion(event)
+
+
+## To select multiple handles at once, you can add nodes to the selection set
+## by shift clicking or shift dragging a selection box.
+## Shift clicking a node can also remove it from the selection set.
+func is_additive_selection():
+	return Input.is_key_pressed(KEY_SHIFT)
+
+
+## Removes a handle from the selection set, if it is inside.
+func deselect(handle):
+	current_selection.erase(handle)
+	handle.selected = false
+
+
+## Removes all handles from the selection set.
+func deselect_all():
+	for handle in current_selection:
+		handle.selected = false
+	current_selection.clear()
+
+
+## Adds a handle to the selection set.
+func select(handle):
+	current_selection[handle] = true
+	handle.selected = true
