@@ -8,6 +8,17 @@ class_name Edge extends Node2D
 var template_points
 
 
+# TODO: This should be combined with some general shape management code.
+# TODO: Currently only works before _ready() is called.
+func make_straight():
+	var left = Vector2.ZERO
+	var right = Vector2.RIGHT
+	var points = PackedVector2Array()
+	points.append(left)
+	points.append(right)
+	$EdgeShape.points = points
+
+
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.

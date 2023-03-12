@@ -20,13 +20,13 @@ var drag_start: Vector2 = Vector2.INF
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var w = 5
-	var h = 3
+	var w = 7
+	var h = 5
 	for x in range(0, w):
 		for y in range(0, h):
 			var handle = handle_scene.instantiate()
 			points[Vector2i(x, y)] = handle
-			handle.position = Vector2(200 * x, 200 * y)
+			handle.position = Vector2(150 * x, 150 * y)
 			handle.z_index = 2
 			handle.camera = camera
 
@@ -42,6 +42,8 @@ func _ready():
 			edge.left_handle = points[Vector2i(x - 1, y)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
+			if y == 0 or y == h - 1:
+				edge.make_straight()
 			add_child(edge)
 
 	for x in range(0, w):
@@ -50,6 +52,8 @@ func _ready():
 			edge.left_handle = points[Vector2i(x, y - 1)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
+			if x == 0 or x == w - 1:
+				edge.make_straight()
 			add_child(edge)
 
 
