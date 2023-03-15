@@ -28,8 +28,13 @@ func _ready():
 	left_handle.position_changed.connect(update_position)
 	right_handle.position_changed.connect(update_position)
 
+	$CatmulRomSpline.refresh_samples()
+
 	# Store the template points so we can always use them to generate the actual points.
-	self.template_points = $EdgeShape.points.duplicate()
+	if $CatmulRomSpline.is_relevant:
+		self.template_points = $CatmulRomSpline.points.duplicate()
+	else:
+		self.template_points = $EdgeShape.points.duplicate()
 
 	# Initial alignment
 	update_position()
@@ -43,7 +48,7 @@ func update_position():
 
 func build_transformation_matrix() -> Transform2D:
 	var left: Vector2 = template_points[0]
-	var right: Vector2 = template_points[$EdgeShape.get_point_count() - 1]
+	var right: Vector2 = template_points[self.template_points.size() - 1]
 
 	var baseline = right - left
 	var shape_length = baseline.length()

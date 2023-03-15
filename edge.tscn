@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cd6yd5nld4ven"]
+[gd_scene load_steps=3 format=3 uid="uid://cd6yd5nld4ven"]
 
 [ext_resource type="Script" path="res://Edge.gd" id="1_x5v5a"]
+[ext_resource type="Script" path="res://CatmulRomSpline.gd" id="2_e60dg"]
 
 [node name="Edge" type="Node2D" node_paths=PackedStringArray("left_handle", "right_handle")]
 script = ExtResource("1_x5v5a")
@@ -10,3 +11,10 @@ right_handle = NodePath("")
 [node name="EdgeShape" type="Line2D" parent="."]
 points = PackedVector2Array(0, 20, 98, -5, 69, -46, 90, -80, 142, -56, 143, -1, 232, -20)
 width = 3.0
+joint_mode = 1
+
+[node name="CatmulRomSpline" type="Line2D" parent="." node_paths=PackedStringArray("guide")]
+visible = false
+points = PackedVector2Array(429, -92)
+script = ExtResource("2_e60dg")
+guide = NodePath("../EdgeShape")
