@@ -101,8 +101,3 @@ func interpolate_one_layer(p0: Vector2, p1: Vector2, t0: float, t1: float, t: fl
 
 func basically_equal(a: Vector2, b: Vector2) -> bool:
 	return a.distance_to(b) < 0.1
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
