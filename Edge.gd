@@ -19,6 +19,23 @@ func make_straight():
 	$EdgeShape.points = points
 
 
+## Randomizes the shape of the edge by adding a random offset to each point.
+## May also flip the edge with a probability of 0.5. (All y-coordinates are negated.)
+func rand_jitter_based(jitter: float):
+	var points = $EdgeShape.points
+	var flip = randf() < 0.5
+	for i in range(points.size()):
+		var rx = randf_range(-jitter, jitter)
+		var ry = randf_range(-jitter, jitter)
+		var point = points[i]
+		point.x += rx
+		point.y += ry
+		if flip:
+			point.y *= -1
+		points[i] = point
+	$EdgeShape.points = points
+
+
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
@@ -27,6 +44,8 @@ func _ready():
 
 	left_handle.position_changed.connect(update_position)
 	right_handle.position_changed.connect(update_position)
+
+	rand_jitter_based(10)
 
 	$CatmulRomSpline.refresh_samples()
 
