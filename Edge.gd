@@ -86,3 +86,7 @@ func build_transformation_matrix() -> Transform2D:
 
 func update_zoom(zoom):
 	$EdgeShape.width = 3 / zoom.x
+
+
+func get_shape_points() -> PackedVector2Array:
+	return $EdgeShape.points

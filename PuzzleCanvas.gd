@@ -6,6 +6,7 @@ var edge_scene = preload("res://edge.tscn")
 @export var camera: Camera2D
 
 var points = {}
+var edges = []
 
 var current_hover = null
 
@@ -39,6 +40,7 @@ func _ready():
 	for x in range(1, w):
 		for y in range(0, h):
 			var edge: Edge = edge_scene.instantiate()
+			edges.append(edge)
 			edge.left_handle = points[Vector2i(x - 1, y)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
@@ -49,6 +51,7 @@ func _ready():
 	for x in range(0, w):
 		for y in range(1, h):
 			var edge: Edge = edge_scene.instantiate()
+			edges.append(edge)
 			edge.left_handle = points[Vector2i(x, y - 1)]
 			edge.right_handle = points[Vector2i(x, y)]
 			edge.camera = camera
@@ -158,6 +161,11 @@ func _unhandled_input(event):
 	elif event is InputEventMouseMotion:
 		handle_mouse_motion(event)
 
+	elif is_ctrl_s_down(event):
+		print("Saving to file...")
+		print(OS.get_user_data_dir())
+		saveToFile()
+
 
 ## To select multiple handles at once, you can add nodes to the selection set
 ## by shift clicking or shift dragging a selection box.
@@ -183,3 +191,31 @@ func deselect_all():
 func select(handle):
 	current_selection[handle] = true
 	handle.selected = true
+
+
+## Returns true if the given event is a ctrl+s key press.
+## This is used to save the current state of the graph.
+func is_ctrl_s_down(event) -> bool:
+	return event is InputEventKey and event.keycode == KEY_S and event.ctrl_pressed and event.pressed
+
+func saveToFile():
+	var file = FileAccess.open("user://jigsaw.svg", FileAccess.WRITE)
+	file.store_string("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
+	file.store_string("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n")
+	file.store_string("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n")
+
+	for edge in edges:
+		# Svg path format: M x1 y1 L x2 y2 L x3 y3 ...
+		file.store_string("<path d=\"" + edge_path(edge) + "\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>\n")
+
+	file.store_string("</svg>")
+
+	file.close()
+
+func edge_path(edge: Edge) -> String:
+	var svg_path = "M "
+	for point in edge.get_shape_points():
+		svg_path += str(point.x) + " " + str(point.y) + " L "
+	svg_path = svg_path.trim_suffix(" L ")
+
+	return svg_path
