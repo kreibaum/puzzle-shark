@@ -6,6 +6,7 @@ class_name Edge extends Node2D
 @export var camera: Camera2D
 
 var template_points
+var original_points
 
 
 # TODO: This should be combined with some general shape management code.
@@ -16,6 +17,7 @@ func make_straight():
 	points.append(left)
 	points.append(right)
 	$EdgeShape.points = points
+	original_points = points.duplicate()
 
 	self.template_points = $EdgeShape.points.duplicate()
 	update_position()
@@ -48,6 +50,7 @@ func _ready():
 	right_handle.position_changed.connect(update_position)
 
 	rand_jitter_based(10)
+	original_points = $EdgeShape.points.duplicate()
 
 	$CatmulRomSpline.refresh_samples()
 
@@ -65,6 +68,8 @@ func _ready():
 # of the handles moves.
 func update_position():
 	$EdgeShape.points = build_transformation_matrix() * self.template_points
+	$EdgeCollisionArea.recalculate($EdgeShape.points)
+	# $EdgeCollisionArea.recalculate(build_transformation_matrix() * original_points)
 
 
 func build_transformation_matrix() -> Transform2D:
@@ -92,3 +97,12 @@ func update_zoom(zoom):
 
 func get_shape_points() -> PackedVector2Array:
 	return $EdgeShape.points
+
+
+## Check for overlap with another edge.
+func _process(_delta):
+	var collisions = $EdgeCollisionArea.get_overlapping_areas()
+	if collisions.size() > 0:
+		$EdgeShape.modulate = Color(1, 0, 0)
+	else:
+		$EdgeShape.modulate = Color(1, 1, 1)
