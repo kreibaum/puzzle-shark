@@ -39,26 +39,38 @@ func _ready():
 
 	for x in range(1, w):
 		for y in range(0, h):
-			var edge: Edge = edge_scene.instantiate()
-			edges.append(edge)
-			edge.left_handle = points[Vector2i(x - 1, y)]
-			edge.right_handle = points[Vector2i(x, y)]
-			edge.camera = camera
+			var edge = create_edge(points[Vector2i(x - 1, y)], points[Vector2i(x, y)])
 			if y == 0 or y == h - 1:
 				edge.make_straight()
-			add_child(edge)
 
 	for x in range(0, w):
 		for y in range(1, h):
-			var edge: Edge = edge_scene.instantiate()
-			edges.append(edge)
-			edge.left_handle = points[Vector2i(x, y - 1)]
-			edge.right_handle = points[Vector2i(x, y)]
-			edge.camera = camera
+			var edge = create_edge(points[Vector2i(x, y - 1)], points[Vector2i(x, y)])
 			if x == 0 or x == w - 1:
 				edge.make_straight()
-			add_child(edge)
 
+## Creates an edge between the two handles.
+func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
+	var edge: Edge = edge_scene.instantiate()
+	edges.append(edge)
+	edge.left_handle = left
+	edge.right_handle = right
+	edge.camera = camera
+	add_child(edge)
+	return edge
+
+## Returns the edge between the two handles, or null if there is none.
+func find_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
+	for edge in edges:
+		if edge.left_handle == left and edge.right_handle == right:
+			return edge
+		elif edge.left_handle == right and edge.right_handle == left:
+			return edge
+	return null
+
+func delete_edge(edge: Edge):
+	edges.erase(edge)
+	edge.queue_free()
 
 func handle_delegated_input_event(handle: DragDropHandle, event: InputEvent):
 	if event is InputEventMouseButton:

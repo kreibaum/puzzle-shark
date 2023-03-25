@@ -9,7 +9,6 @@ var template_points
 
 
 # TODO: This should be combined with some general shape management code.
-# TODO: Currently only works before _ready() is called.
 func make_straight():
 	var left = Vector2.ZERO
 	var right = Vector2.RIGHT
@@ -17,6 +16,9 @@ func make_straight():
 	points.append(left)
 	points.append(right)
 	$EdgeShape.points = points
+
+	self.template_points = $EdgeShape.points.duplicate()
+	update_position()
 
 
 ## Randomizes the shape of the edge by adding a random offset to each point.
