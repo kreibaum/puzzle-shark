@@ -5,6 +5,8 @@ class_name Edge extends Node2D
 
 @export var camera: Camera2D
 
+signal captured_input_event(Edge, InputEvent)
+
 var baseline: Vector2 = Vector2(0, 0)
 var must_update_position: bool = true
 

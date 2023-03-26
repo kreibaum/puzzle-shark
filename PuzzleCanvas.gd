@@ -54,6 +54,7 @@ func _ready():
 func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
 	edge.set_points_before_init($EdgeGenerator.random_line())
+	edge.captured_input_event.connect(handle_delegated_edge_input_event)
 
 	edges.append(edge)
 	edge.left_handle = left
@@ -105,7 +106,6 @@ func handle_delegated_input_event(handle: DragDropHandle, event: InputEvent):
 
 	elif event is InputEventMouseMotion:
 		handle_mouse_motion(event)
-
 
 ## Handles mouse motion based on the global mouse position.
 func handle_mouse_motion(event: InputEventMouseMotion):
@@ -180,6 +180,20 @@ func _unhandled_input(event):
 		print("Saving to file...")
 		print(OS.get_user_data_dir())
 		saveToFile()
+
+var edge_on_which_click_started: Edge = null
+
+func handle_delegated_edge_input_event(edge: Edge, event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				edge_on_which_click_started = edge
+			else:
+				if edge_on_which_click_started == edge:
+					deselect_all()
+					select(edge.left_handle)
+					select(edge.right_handle)
+				edge_on_which_click_started = null
 
 
 ## To select multiple handles at once, you can add nodes to the selection set
