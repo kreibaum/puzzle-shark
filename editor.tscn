@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://caibbyl7lcvdq"]
+[gd_scene load_steps=9 format=3 uid="uid://caibbyl7lcvdq"]
 
 [ext_resource type="Script" path="res://PanCamera.gd" id="1_8jika"]
 [ext_resource type="PackedScene" uid="uid://dlgf7q63selrp" path="res://puzzle_canvas.tscn" id="2_hetub"]
@@ -6,6 +6,13 @@
 [ext_resource type="Script" path="res://RandomizeEdgeButton.gd" id="4_nlaqt"]
 [ext_resource type="Script" path="res://AddEdgeButton.gd" id="5_sxt5f"]
 [ext_resource type="Script" path="res://DeleteEdgeButton.gd" id="6_kqwcc"]
+
+[sub_resource type="Theme" id="Theme_mnow6"]
+resource_name = "ButtonTheme"
+Button/colors/font_pressed_color = Color(0.470588, 0.788235, 0.996078, 1)
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_07nag"]
+resource_name = "ToolSelected"
 
 [node name="Node2D" type="Node2D"]
 
@@ -48,3 +55,18 @@ layout_mode = 2
 text = "Delete Edge"
 script = ExtResource("6_kqwcc")
 canvas = NodePath("../../../PuzzleCanvas")
+
+[node name="SelectionToolButton" type="Button" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
+theme = SubResource("Theme_mnow6")
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_07nag")
+text = "Selection"
+
+[node name="NoOpToolButton" type="Button" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
+theme = SubResource("Theme_mnow6")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_07nag")
+text = "Do Nothing"
