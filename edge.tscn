@@ -28,3 +28,5 @@ script = ExtResource("3_3rh3j")
 
 [node name="Polygon" type="CollisionPolygon2D" parent="EdgeCollisionArea"]
 polygon = PackedVector2Array(13, -1, 13, 14, 110, 18, 92, -37, 120, -57, 148, -40, 128, 16, 238, 11, 234, -15, 170, -18, 187, -66, 113, -103, 61, -62, 57, -36, 75, -14, 17, -20)
+
+[node name="AlternativeEdges" type="Node" parent="."]

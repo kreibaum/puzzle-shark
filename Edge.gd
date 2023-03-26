@@ -8,6 +8,11 @@ class_name Edge extends Node2D
 var baseline: Vector2 = Vector2(0, 0)
 var must_update_position: bool = true
 
+
+func set_points_before_init(new_points: PackedVector2Array):
+	$EdgeShape.points = new_points
+
+
 # TODO: This should be combined with some general shape management code.
 func make_straight():
 	var left = Vector2.ZERO
@@ -16,26 +21,11 @@ func make_straight():
 	points.append(left)
 	points.append(right)
 	$EdgeShape.points = points
-	
+
 	update_position()
 	update_width()
 	update_carea(true)
 
-## Randomizes the shape of the edge by adding a random offset to each point.
-## May also flip the edge with a probability of 0.5. (All y-coordinates are negated.)
-func rand_jitter_based(jitter: float):
-	var points = $EdgeShape.points
-	var flip = randf() < 0.5
-	for i in range(points.size()):
-		var rx = randf_range(-jitter, jitter)
-		var ry = randf_range(-jitter, jitter)
-		var point = points[i]
-		point.x += rx
-		point.y += ry
-		if flip:
-			point.y *= -1
-		points[i] = point
-	$EdgeShape.points = points
 
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
@@ -46,8 +36,6 @@ func _ready():
 	left_handle.position_changed.connect(query_update_position)
 	right_handle.position_changed.connect(query_update_position)
 
-	rand_jitter_based(10)
-
 	$CatmulRomSpline.refresh_samples()
 	if $CatmulRomSpline.is_relevant:
 		$EdgeShape.points = $CatmulRomSpline.points.duplicate()
@@ -57,15 +45,18 @@ func _ready():
 	update_width()
 	update_carea(true)
 
+
 # Ask the node to update its transformation in the next _process step
 func query_update_position():
 	self.must_update_position = true
+
 
 # Called to set up the edge in the correct position and then again whenever one
 # of the handles moves.
 func update_position():
 	var transformation = build_transformation_matrix()
 	set_transform(transformation)
+
 
 # Update the collision area of the edge
 func update_carea(force = false):
@@ -74,9 +65,11 @@ func update_carea(force = false):
 		self.baseline = target_baseline
 		$EdgeCollisionArea.recalculate($EdgeShape.points, 9 / self.scale.x)
 
+
 # Update the width of the edge
 func update_width(zoom = camera.zoom):
 	$EdgeShape.width = 3 / (zoom.x * self.scale.x)
+
 
 func build_transformation_matrix() -> Transform2D:
 	var left: Vector2 = $EdgeShape.points[0]
@@ -96,9 +89,11 @@ func build_transformation_matrix() -> Transform2D:
 	var zero_out = Transform2D(0, Vector2.ONE, 0, -left)
 	return Transform2D(target_angle - shape_angle, scale_vector, 0, left_handle.position) * zero_out
 
+
 # Return absolute point coordinates of the edge
 func get_shape_points() -> PackedVector2Array:
 	return self.transform * $EdgeShape.points
+
 
 ## Check for overlap with another edge.
 func _process(_delta):
@@ -107,7 +102,7 @@ func _process(_delta):
 		update_width()
 		update_carea(false)
 		must_update_position = false
-	
+
 	if $EdgeCollisionArea.monitoring:
 		var collisions = $EdgeCollisionArea.get_overlapping_areas()
 		if collisions.size() > 0:

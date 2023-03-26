@@ -53,6 +53,8 @@ func _ready():
 ## Creates an edge between the two handles.
 func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
+	edge.set_points_before_init($EdgeGenerator.random_line())
+
 	edges.append(edge)
 	edge.left_handle = left
 	edge.right_handle = right
