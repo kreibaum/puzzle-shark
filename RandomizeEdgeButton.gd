@@ -18,4 +18,5 @@ func _on_Button_pressed():
 		var points: Array = selection.keys()
 		var edge = canvas.find_edge(points[0], points[1])
 		canvas.create_edge(points[0], points[1])
-		canvas.delete_edge(edge)
+		if edge != null:
+			canvas.delete_edge(edge)
