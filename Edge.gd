@@ -5,9 +5,8 @@ class_name Edge extends Node2D
 
 @export var camera: Camera2D
 
-var template_points
-var original_points
-
+var baseline: Vector2 = Vector2(0, 0)
+var must_update_position: bool = true
 
 # TODO: This should be combined with some general shape management code.
 func make_straight():
@@ -17,11 +16,10 @@ func make_straight():
 	points.append(left)
 	points.append(right)
 	$EdgeShape.points = points
-	original_points = points.duplicate()
-
-	self.template_points = $EdgeShape.points.duplicate()
+	
 	update_position()
-
+	update_width()
+	update_carea(true)
 
 ## Randomizes the shape of the edge by adding a random offset to each point.
 ## May also flip the edge with a probability of 0.5. (All y-coordinates are negated.)
@@ -39,42 +37,50 @@ func rand_jitter_based(jitter: float):
 		points[i] = point
 	$EdgeShape.points = points
 
-
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
-	camera.zoom_changed.connect(update_zoom)
+	camera.zoom_changed.connect(update_width)
 
-	left_handle.position_changed.connect(update_position)
-	right_handle.position_changed.connect(update_position)
+	left_handle.position_changed.connect(query_update_position)
+	right_handle.position_changed.connect(query_update_position)
 
 	rand_jitter_based(10)
-	original_points = $EdgeShape.points.duplicate()
 
 	$CatmulRomSpline.refresh_samples()
-
-	# Store the template points so we can always use them to generate the actual points.
 	if $CatmulRomSpline.is_relevant:
-		self.template_points = $CatmulRomSpline.points.duplicate()
-	else:
-		self.template_points = $EdgeShape.points.duplicate()
+		$EdgeShape.points = $CatmulRomSpline.points.duplicate()
 
 	# Initial alignment
 	update_position()
+	update_width()
+	update_carea(true)
 
+# Ask the node to update its transformation in the next _process step
+func query_update_position():
+	self.must_update_position = true
 
 # Called to set up the edge in the correct position and then again whenever one
 # of the handles moves.
 func update_position():
-	$EdgeShape.points = build_transformation_matrix() * self.template_points
-	$EdgeCollisionArea.recalculate($EdgeShape.points)
-	# $EdgeCollisionArea.recalculate(build_transformation_matrix() * original_points)
+	var transformation = build_transformation_matrix()
+	set_transform(transformation)
 
+# Update the collision area of the edge
+func update_carea(force = false):
+	var target_baseline = right_handle.position - left_handle.position
+	if force or target_baseline.distance_to(self.baseline) > 0.1:
+		self.baseline = target_baseline
+		$EdgeCollisionArea.recalculate($EdgeShape.points, 9 / self.scale.x)
+
+# Update the width of the edge
+func update_width(zoom = camera.zoom):
+	$EdgeShape.width = 3 / (zoom.x * self.scale.x)
 
 func build_transformation_matrix() -> Transform2D:
-	var left: Vector2 = template_points[0]
-	var right: Vector2 = template_points[self.template_points.size() - 1]
+	var left: Vector2 = $EdgeShape.points[0]
+	var right: Vector2 = $EdgeShape.points[-1]
 
 	var baseline = right - left
 	var shape_length = baseline.length()
@@ -90,19 +96,21 @@ func build_transformation_matrix() -> Transform2D:
 	var zero_out = Transform2D(0, Vector2.ONE, 0, -left)
 	return Transform2D(target_angle - shape_angle, scale_vector, 0, left_handle.position) * zero_out
 
-
-func update_zoom(zoom):
-	$EdgeShape.width = 3 / zoom.x
-
-
+# Return absolute point coordinates of the edge
 func get_shape_points() -> PackedVector2Array:
-	return $EdgeShape.points
-
+	return self.transform * $EdgeShape.points
 
 ## Check for overlap with another edge.
 func _process(_delta):
-	var collisions = $EdgeCollisionArea.get_overlapping_areas()
-	if collisions.size() > 0:
-		$EdgeShape.modulate = Color(1, 0, 0)
-	else:
-		$EdgeShape.modulate = Color(1, 1, 1)
+	if must_update_position:
+		update_position()
+		update_width()
+		update_carea(false)
+		must_update_position = false
+	
+	if $EdgeCollisionArea.monitoring:
+		var collisions = $EdgeCollisionArea.get_overlapping_areas()
+		if collisions.size() > 0:
+			$EdgeShape.modulate = Color(1, 0, 0)
+		else:
+			$EdgeShape.modulate = Color(1, 1, 1)

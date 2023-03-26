@@ -1,7 +1,7 @@
 class_name CatmulRomSpline extends Line2D
 
 @export var guide: Line2D
-@export var samples: int = 25
+@export var samples: int = 64
 
 # A spline follows several points. These points are called "control points".
 var control_points: PackedVector2Array

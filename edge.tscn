@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Edge.gd" id="1_x5v5a"]
 [ext_resource type="Script" path="res://CatmulRomSpline.gd" id="2_e60dg"]
-[ext_resource type="Script" path="res://EdgeCollisionArea.gd" id="3_20l8b"]
+[ext_resource type="Script" path="res://EdgeCollisionArea.gd" id="3_3rh3j"]
 
 [node name="Edge" type="Node2D" node_paths=PackedStringArray("left_handle", "right_handle")]
 script = ExtResource("1_x5v5a")
@@ -22,6 +22,9 @@ guide = NodePath("../EdgeShape")
 samples = 30
 
 [node name="EdgeCollisionArea" type="Area2D" parent="."]
-collision_layer = 2
-collision_mask = 2
-script = ExtResource("3_20l8b")
+collision_layer = 4
+collision_mask = 4
+script = ExtResource("3_3rh3j")
+
+[node name="Polygon" type="CollisionPolygon2D" parent="EdgeCollisionArea"]
+polygon = PackedVector2Array(13, -1, 13, 14, 110, 18, 92, -37, 120, -57, 148, -40, 128, 16, 238, 11, 234, -15, 170, -18, 187, -66, 113, -103, 61, -62, 57, -36, 75, -14, 17, -20)

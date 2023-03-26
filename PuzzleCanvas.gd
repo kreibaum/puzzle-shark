@@ -23,6 +23,7 @@ var drag_start: Vector2 = Vector2.INF
 func _ready():
 	var w = 7
 	var h = 5
+	
 	for x in range(0, w):
 		for y in range(0, h):
 			var handle = handle_scene.instantiate()

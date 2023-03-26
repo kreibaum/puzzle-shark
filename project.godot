@@ -13,6 +13,7 @@ config_version=5
 config/name="Puzzle Shark"
 run/main_scene="res://editor.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
+run/low_processor_mode=true
 config/icon="res://icon.svg"
 
 [display]
@@ -33,7 +34,13 @@ ZoomIn={
 ]
 }
 
+[physics]
+
+2d/run_on_separate_thread=true
+common/physics_ticks_per_second=30
+2d/physics_engine="GodotPhysics2D"
+2d/default_gravity=0.0
+
 [rendering]
 
-renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
