@@ -13,10 +13,7 @@ func _on_Button_pressed():
 	# dictionary. If so, randomize the line between those two points.
 
 	# Randomization essentially just deletes a line and creates a new one.
-	var selection: Dictionary = canvas.current_selection
-	if selection.size() == 2:
-		var points: Array = selection.keys()
-		var edge = canvas.find_edge(points[0], points[1])
-		canvas.create_edge(points[0], points[1])
-		if edge != null:
-			canvas.delete_edge(edge)
+	var selected_edges = canvas.get_selected_edges()
+	for edge in selected_edges:
+		canvas.create_edge(edge.left_handle, edge.right_handle)
+		canvas.delete_edge(edge)

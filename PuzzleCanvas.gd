@@ -72,6 +72,14 @@ func find_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 			return edge
 	return null
 
+
+func get_selected_edges() -> Array:
+	var result = []
+	for edge in edges:
+		if edge.left_handle in current_selection and edge.right_handle in current_selection:
+			result.append(edge)
+	return result
+
 func delete_edge(edge: Edge):
 	edges.erase(edge)
 	edge.queue_free()
