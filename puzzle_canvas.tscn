@@ -54,3 +54,9 @@ points = PackedVector2Array(136, 472, 403, 485, 319, 342, 376, 297, 459, 359, 54
 script = ExtResource("4_4oj1y")
 frequency = 0.2
 template_name = "Heart"
+
+[node name="Straight" type="Line2D" parent="EdgeGenerator"]
+points = PackedVector2Array(700, 200, 900, 200)
+script = ExtResource("4_4oj1y")
+frequency = 0.0
+template_name = "Strait"
