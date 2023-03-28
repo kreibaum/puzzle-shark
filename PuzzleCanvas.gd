@@ -15,6 +15,9 @@ var current_hover = null
 ## The set of currently selected handles.
 var current_selection: Dictionary = Dictionary()
 
+## Triggered when the selection changes.
+signal selection_changed
+
 # Variables related to dragging. INF means we are not dragging.
 var drag_start: Vector2 = Vector2.INF
 
@@ -61,6 +64,7 @@ func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 	edge.right_handle = right
 	edge.camera = camera
 	add_child(edge)
+	selection_changed.emit()
 	return edge
 
 ## Returns the edge between the two handles, or null if there is none.
@@ -83,6 +87,8 @@ func get_selected_edges() -> Array:
 func delete_edge(edge: Edge):
 	edges.erase(edge)
 	edge.queue_free()
+	selection_changed.emit()
+	
 
 func handle_delegated_input_event(handle: DragDropHandle, event: InputEvent):
 	if event is InputEventMouseButton:
@@ -215,6 +221,7 @@ func is_additive_selection():
 func deselect(handle):
 	current_selection.erase(handle)
 	handle.selected = false
+	selection_changed.emit()
 
 
 ## Removes all handles from the selection set.
@@ -222,12 +229,14 @@ func deselect_all():
 	for handle in current_selection:
 		handle.selected = false
 	current_selection.clear()
+	selection_changed.emit()
 
 
 ## Adds a handle to the selection set.
 func select(handle):
 	current_selection[handle] = true
 	handle.selected = true
+	selection_changed.emit()
 
 
 ## Returns true if the given event is a ctrl+s key press.

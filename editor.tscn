@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://caibbyl7lcvdq"]
+[gd_scene load_steps=10 format=3 uid="uid://caibbyl7lcvdq"]
 
 [ext_resource type="Script" path="res://PanCamera.gd" id="1_8jika"]
 [ext_resource type="PackedScene" uid="uid://dlgf7q63selrp" path="res://puzzle_canvas.tscn" id="2_hetub"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://RandomizeEdgeButton.gd" id="4_nlaqt"]
 [ext_resource type="Script" path="res://AddEdgeButton.gd" id="5_sxt5f"]
 [ext_resource type="Script" path="res://DeleteEdgeButton.gd" id="6_kqwcc"]
+[ext_resource type="Script" path="res://EdgeInspector.gd" id="7_8j4v5"]
 
 [sub_resource type="Theme" id="Theme_mnow6"]
 resource_name = "ButtonTheme"
@@ -17,7 +18,7 @@ resource_name = "ToolSelected"
 [node name="Node2D" type="Node2D"]
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(0, 82)
+position = Vector2(-119, 101)
 offset = Vector2(500, 220)
 script = ExtResource("1_8jika")
 
@@ -70,3 +71,48 @@ theme = SubResource("Theme_mnow6")
 toggle_mode = true
 button_group = SubResource("ButtonGroup_07nag")
 text = "Do Nothing"
+
+[node name="EdgeInspector" type="VBoxContainer" parent="CanvasLayer" node_paths=PackedStringArray("canvas")]
+offset_left = 11.0
+offset_top = 237.0
+offset_right = 143.0
+offset_bottom = 352.0
+script = ExtResource("7_8j4v5")
+canvas = NodePath("../../PuzzleCanvas")
+
+[node name="SelectionLabel" type="Label" parent="CanvasLayer/EdgeInspector"]
+layout_mode = 2
+text = "No Selection"
+horizontal_alignment = 1
+
+[node name="SingleEdgeView" type="Panel" parent="CanvasLayer/EdgeInspector"]
+custom_minimum_size = Vector2(50, 90)
+layout_mode = 2
+
+[node name="LinePreview" type="Line2D" parent="CanvasLayer/EdgeInspector/SingleEdgeView"]
+position = Vector2(5, 7)
+points = PackedVector2Array(18, 26, 54, 28, 50, 17, 63, 5, 78, 17, 73, 32, 109, 30)
+width = 3.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/EdgeInspector"]
+layout_mode = 2
+
+[node name="LongerEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "+"
+
+[node name="ShorterEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "-"
+
+[node name="LeftKnobButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "<"
+
+[node name="RightKnobButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = ">"

@@ -77,19 +77,9 @@ func build_transformation_matrix() -> Transform2D:
 	var left: Vector2 = $EdgeShape.points[0]
 	var right: Vector2 = $EdgeShape.points[-1]
 
-	var baseline = right - left
-	var shape_length = baseline.length()
-	var shape_angle = baseline.angle()
-
-	var target_baseline = right_handle.position - left_handle.position
-	var target_length = target_baseline.length()
-	var target_angle = target_baseline.angle()
-
-	var scale_vector = Vector2(target_length / shape_length, target_length / shape_length)
-
-	# It is important that we first move
-	var zero_out = Transform2D(0, Vector2.ONE, 0, -left)
-	return Transform2D(target_angle - shape_angle, scale_vector, 0, left_handle.position) * zero_out
+	return FixedPointTransform2D.build_transformation_matrix(
+		left, right, left_handle.position, right_handle.position
+	)
 
 
 # Return absolute point coordinates of the edge
