@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://dlgf7q63selrp"]
+[gd_scene load_steps=6 format=3 uid="uid://dlgf7q63selrp"]
 
 [ext_resource type="Script" path="res://PuzzleCanvas.gd" id="1_y76fk"]
 [ext_resource type="Script" path="res://SelectionBox.gd" id="2_yor7s"]
 [ext_resource type="Script" path="res://EdgeGenerator.gd" id="3_ye8um"]
+[ext_resource type="Script" path="res://EdgeTemplate.gd" id="4_4oj1y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_awmdd"]
 size = Vector2(1, 1)
@@ -29,16 +30,27 @@ script = ExtResource("3_ye8um")
 [node name="TwoKnobSymetry" type="Line2D" parent="EdgeGenerator"]
 position = Vector2(161, -60)
 points = PackedVector2Array(-22, 150, 145, 179, 129, 95, 188, 68, 265, 104, 231.236, 158.022, 205, 200, 272, 234, 335, 214, 333, 132, 511, 161)
+script = ExtResource("4_4oj1y")
+template_name = "Snake"
 
 [node name="BreakingWave" type="Line2D" parent="EdgeGenerator"]
 position = Vector2(-160, -465)
 points = PackedVector2Array(69, 422, 257, 405, 318, 318, 439, 315, 430, 378, 337, 422, 363, 456, 421, 446, 606, 393)
+script = ExtResource("4_4oj1y")
+frequency = 3.0
+template_name = "Wave"
 
 [node name="VanillaKnob" type="Line2D" parent="EdgeGenerator"]
 position = Vector2(638, -8)
 points = PackedVector2Array(-44, 0, 95, 0, 70, -50, 120, -80, 170, -50, 145, 0, 284, 2)
 width = 3.0
 joint_mode = 1
+script = ExtResource("4_4oj1y")
+frequency = 10.0
+template_name = "Default"
 
 [node name="HeartShape" type="Line2D" parent="EdgeGenerator"]
 points = PackedVector2Array(136, 472, 403, 485, 319, 342, 376, 297, 459, 359, 548, 306, 609, 361, 521, 490, 860, 487)
+script = ExtResource("4_4oj1y")
+frequency = 0.2
+template_name = "Heart"
