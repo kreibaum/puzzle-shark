@@ -9,6 +9,7 @@ signal captured_input_event(Edge, InputEvent)
 
 var baseline: Vector2 = Vector2(0, 0)
 var must_update_position: bool = true
+var original_points: PackedVector2Array
 
 
 func set_points_before_init(new_points: PackedVector2Array):
@@ -33,11 +34,16 @@ func make_straight():
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
+	original_points = $EdgeShape.points.duplicate()
 	camera.zoom_changed.connect(update_width)
 
 	left_handle.position_changed.connect(query_update_position)
 	right_handle.position_changed.connect(query_update_position)
 
+	smooth_and_update()
+
+
+func smooth_and_update():
 	$CatmulRomSpline.refresh_samples()
 	if $CatmulRomSpline.is_relevant:
 		$EdgeShape.points = $CatmulRomSpline.points.duplicate()

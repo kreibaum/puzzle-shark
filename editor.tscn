@@ -94,25 +94,25 @@ position = Vector2(5, 7)
 points = PackedVector2Array(18, 26, 54, 28, 50, 17, 63, 5, 78, 17, 73, 32, 109, 30)
 width = 3.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/EdgeInspector"]
+[node name="SmallEdgeButtons" type="HBoxContainer" parent="CanvasLayer/EdgeInspector"]
 layout_mode = 2
 
-[node name="LongerEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+[node name="LongerEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/SmallEdgeButtons"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = "+"
 
-[node name="ShorterEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+[node name="ShorterEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/SmallEdgeButtons"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = "-"
 
-[node name="LeftKnobButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+[node name="LeftShiftEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/SmallEdgeButtons"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = "<"
 
-[node name="RightKnobButton" type="Button" parent="CanvasLayer/EdgeInspector/HBoxContainer"]
+[node name="RightShiftEdgeButton" type="Button" parent="CanvasLayer/EdgeInspector/SmallEdgeButtons"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = ">"
