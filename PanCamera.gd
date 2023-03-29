@@ -25,9 +25,9 @@ func _unhandled_input(event):
 		drag_stop()
 		
 	if event.is_action_pressed("ZoomIn"):
-		zoom_at_mouse_smooth(self.zoom_target * 0.8)
+		zoom_at_mouse_smooth(self.zoom_target * 0.85)
 	elif event.is_action_pressed("ZoomOut"):
-		zoom_at_mouse_smooth(self.zoom_target / 0.8)
+		zoom_at_mouse_smooth(self.zoom_target / 0.85)
 
 
 func drag_timestamp():
@@ -56,7 +56,7 @@ func drag_stop():
 		velocity = self.drag_velocity.normalized() * 10
 	else:
 		velocity = self.drag_velocity
-	self.drag_tween.tween_method(drag_glide, velocity, Vector2(0, 0), 0.4)
+	self.drag_tween.tween_method(drag_glide, velocity, Vector2(0, 0), 0.5)
 
 func drag_glide(velocity: Vector2):
 	var dt = drag_timestamp()

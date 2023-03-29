@@ -1,6 +1,5 @@
 class_name CatmulRomSpline extends Line2D
 
-@export var guide: Line2D
 @export var samples: int = 64
 
 # A spline follows several points. These points are called "control points".
@@ -11,13 +10,12 @@ var control_times: PackedFloat32Array
 
 var is_relevant: bool = false
 
-
 # Called when the node enters the scene tree for the first time.
-func refresh_samples():
+func refresh_samples(guide: PackedVector2Array):
 	# We do a Catmul-Rom spline interpolation between the points of the Line2D
 	# node that guides the spline.
 
-	control_points = guide.points
+	control_points = guide
 	if control_points.size() < 4:
 		return
 

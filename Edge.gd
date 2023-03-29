@@ -9,49 +9,51 @@ signal captured_input_event(Edge, InputEvent)
 
 var baseline: Vector2 = Vector2(0, 0)
 var must_update_position: bool = true
-var original_points: PackedVector2Array
+var points: PackedVector2Array
 
+var color: Color = Color.WHITE
+var color_default: Color = Color.WHITE
+var color_collision: Color = Color.RED
 
 func set_points_before_init(new_points: PackedVector2Array):
-	$EdgeShape.points = new_points
+	self.points = new_points
 
+func _draw():
+	# A width of -1 always creates a visually thin line
+	draw_polyline(self.points, self.color, -1, true)
 
 # TODO: This should be combined with some general shape management code.
 func make_straight():
 	var left = Vector2.ZERO
 	var right = Vector2.RIGHT
-	var points = PackedVector2Array()
-	points.append(left)
-	points.append(right)
-	$EdgeShape.points = points
+	var edge_shape = PackedVector2Array()
+	edge_shape.append(left)
+	edge_shape.append(right)
+	self.points = edge_shape
 
 	update_position()
-	update_width()
 	update_carea(true)
+	queue_redraw()
 
 
 # Called when the node enters the scene tree for the first time.
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
-	original_points = $EdgeShape.points.duplicate()
-	camera.zoom_changed.connect(update_width)
-
 	left_handle.position_changed.connect(query_update_position)
 	right_handle.position_changed.connect(query_update_position)
-
 	smooth_and_update()
 
 
 func smooth_and_update():
-	$CatmulRomSpline.refresh_samples()
+	$CatmulRomSpline.refresh_samples(self.points)
 	if $CatmulRomSpline.is_relevant:
-		$EdgeShape.points = $CatmulRomSpline.points.duplicate()
+		self.points = $CatmulRomSpline.points.duplicate()
 
 	# Initial alignment
 	update_position()
-	update_width()
 	update_carea(true)
+	queue_redraw()
 
 
 # Ask the node to update its transformation in the next _process step
@@ -71,39 +73,37 @@ func update_carea(force = false):
 	var target_baseline = right_handle.position - left_handle.position
 	if force or target_baseline.distance_to(self.baseline) > 0.1:
 		self.baseline = target_baseline
-		$EdgeCollisionArea.recalculate($EdgeShape.points, 9 / self.scale.x)
+		$EdgeCollisionArea.recalculate(self.points, 9 / self.scale.x)
 
-
-# Update the width of the edge
-func update_width(zoom = camera.zoom):
-	$EdgeShape.width = 3 / (zoom.x * self.scale.x)
-
-
+# Construct the transformation matrix that maps the node polyline to its handles
 func build_transformation_matrix() -> Transform2D:
-	var left: Vector2 = $EdgeShape.points[0]
-	var right: Vector2 = $EdgeShape.points[-1]
+	var left: Vector2 = self.points[0]
+	var right: Vector2 = self.points[-1]
 
 	return FixedPointTransform2D.build_transformation_matrix(
 		left, right, left_handle.position, right_handle.position
 	)
 
-
 # Return absolute point coordinates of the edge
 func get_shape_points() -> PackedVector2Array:
-	return self.transform * $EdgeShape.points
+	return self.transform * self.points
 
+func set_color(col: Color):
+	if self.color != col:
+		self.color = col
+		queue_redraw()
 
 ## Check for overlap with another edge.
 func _process(_delta):
 	if must_update_position:
-		update_position()
-		update_width()
-		update_carea(false)
 		must_update_position = false
+		update_position()
+		update_carea(false)
+		queue_redraw()
 
 	if $EdgeCollisionArea.monitoring:
 		var collisions = $EdgeCollisionArea.get_overlapping_areas()
 		if collisions.size() > 0:
-			$EdgeShape.modulate = Color(1, 0, 0)
+			set_color(self.color_collision)
 		else:
-			$EdgeShape.modulate = Color(1, 1, 1)
+			set_color(self.color_default)
