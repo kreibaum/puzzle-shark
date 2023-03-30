@@ -10,17 +10,21 @@ signal captured_input_event(Edge, InputEvent)
 var baseline: Vector2 = Vector2(0, 0)
 var must_update_position: bool = true
 var points: PackedVector2Array
+var original_points: PackedVector2Array
 
 var color: Color = Color.WHITE
 var color_default: Color = Color.WHITE
 var color_collision: Color = Color.RED
 
+
 func set_points_before_init(new_points: PackedVector2Array):
 	self.points = new_points
+
 
 func _draw():
 	# A width of -1 always creates a visually thin line
 	draw_polyline(self.points, self.color, -1, true)
+
 
 # TODO: This should be combined with some general shape management code.
 func make_straight():
@@ -40,6 +44,7 @@ func make_straight():
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
+	self.original_points = self.points.duplicate()
 	left_handle.position_changed.connect(query_update_position)
 	right_handle.position_changed.connect(query_update_position)
 	smooth_and_update()
@@ -75,6 +80,7 @@ func update_carea(force = false):
 		self.baseline = target_baseline
 		$EdgeCollisionArea.recalculate(self.points, 9 / self.scale.x)
 
+
 # Construct the transformation matrix that maps the node polyline to its handles
 func build_transformation_matrix() -> Transform2D:
 	var left: Vector2 = self.points[0]
@@ -84,14 +90,17 @@ func build_transformation_matrix() -> Transform2D:
 		left, right, left_handle.position, right_handle.position
 	)
 
+
 # Return absolute point coordinates of the edge
 func get_shape_points() -> PackedVector2Array:
 	return self.transform * self.points
+
 
 func set_color(col: Color):
 	if self.color != col:
 		self.color = col
 		queue_redraw()
+
 
 ## Check for overlap with another edge.
 func _process(_delta):
