@@ -1,6 +1,17 @@
 class_name DragDropHandle extends Area2D
 
-var position_before_drag: Vector2 = Vector2.INF
+var stored_position: Vector2 = Vector2.INF
+
+func store_position(position_to_store: Vector2):
+	stored_position = position_to_store
+
+func unstore_position():
+	stored_position = Vector2.INF
+
+func restore_position():
+	var position_to_restore = stored_position
+	unstore_position()
+	return position_to_restore
 
 var hovered: bool = false:
 	set(value):
@@ -30,54 +41,15 @@ signal captured_hover_event(DragDropHandle, bool)
 func _ready():
 	camera.zoom_changed.connect(update_zoom)
 
-
-## Moves the handle by the given offset, but remembers where it was before the
-## drag started so that it can be rolled back.
-func preview_drag(delta: Vector2):
-	if position_before_drag == Vector2.INF:
-		position_before_drag = self.position
-	move_to(position_before_drag + delta)
-
-
-## Commits the drag, i.e. the handle is moved to the new position and the
-## position before the drag is forgotten.
-func commit_drag(delta: Vector2):
-	preview_drag(delta)
-	position_before_drag = Vector2.INF
-
-
-## Rolls back the drag, i.e. the handle is moved back to the position before the
-## drag started.
-func rollback_drag():
-	if position_before_drag != Vector2.INF:
-		move_to(position_before_drag)
-		position_before_drag = Vector2.INF
-
-
-# Sets the position and triggers the signal so dependent objects can update.
-func move_to(new_position):
-	if self.position != new_position:
-		self.position = new_position
-		position_changed.emit()
-
-
-func transform(transformation: Transform2D):
-	self.position = transformation * self.position
-	position_changed.emit()
-
-
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):
 	captured_input_event.emit(self, event)
 
-
 func _mouse_enter():
 	captured_hover_event.emit(self, true)
 
-
 func _mouse_exit():
 	captured_hover_event.emit(self, false)
-
 
 func update_color():
 	if selected:
@@ -90,3 +62,4 @@ func update_color():
 
 func update_zoom(zoom):
 	self.scale = Vector2(1 / zoom.x, 1 / zoom.y)
+

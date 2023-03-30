@@ -1,7 +1,7 @@
 class_name SelectState extends State
 
 # Variables related to dragging. INF means we are not dragging.
-var drag_start: Vector2 = Vector2.INF
+var drag_position: Vector2 = Vector2.INF
 
 
 # Called when the node enters the scene tree for the first time.
@@ -14,24 +14,25 @@ func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				# We are now dragging.
-				drag_start = canvas.get_global_mouse_position()
+				canvas.apply_on_selected_handles(canvas.drag_handle_start)
+				drag_position = canvas.get_global_mouse_position()
 			else:
 				# Is this adding to the selection?
 				if is_additive_selection():
 					if canvas.current_selection.has(handle):
-						canvas.deselect(handle)
+						canvas.deselect_handle(handle)
 					else:
-						canvas.select(handle)
+						canvas.select_handle(handle)
 				else:
 					# Exclusive mode, so we deselect everything else.
-					canvas.deselect_all()
-					canvas.select(handle)
+					canvas.deselect_all_handles()
+					canvas.select_handle(handle)
 
 				handle_mouse_release()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			# Rollback the drag.
-			drag_start = Vector2.INF
-			canvas.apply_on_selection(func(handle): handle.rollback_drag())
+			canvas.apply_on_selected_handles(canvas.drag_handle_rollback)
+			drag_position = Vector2.INF
 
 			# Remove the selection box without effect.
 			canvas.selection_box.end_selection()
@@ -54,34 +55,36 @@ func is_ctrl_s_down(event) -> bool:
 		event is InputEventKey and event.keycode == KEY_S and event.ctrl_pressed and event.pressed
 	)
 
-
 ## Handles release of the left mouse button.
 func handle_mouse_release():
 	# Are we dragging? If so, we need to commit the drag.
-	if drag_start != Vector2.INF:
-		var delta = canvas.get_global_mouse_position() - drag_start
-		canvas.apply_on_selection(func(handle): handle.commit_drag(delta))
-		drag_start = Vector2.INF
+	if drag_position != Vector2.INF:
+		var delta = canvas.get_global_mouse_position() - drag_position
+		canvas.move_selected_handles_by(delta)
+		canvas.apply_on_selected_handles(canvas.drag_handle_end)
+		drag_position = Vector2.INF
 
 	# We also commit the selection box, if we have one:
 	if canvas.selection_box.is_selecting:
 		# Is this adding to the selection?
 		if !is_additive_selection():
 			# Exclusive mode, so we deselect everything else.
-			canvas.deselect_all()
+			canvas.deselect_all_handles()
 
 		for handle in canvas.selection_box.current_selection:
-			canvas.select(handle)
+			canvas.select_handle(handle)
 
 		canvas.selection_box.end_selection()
 
 
 ## Handles mouse motion based on the global mouse position.
 func handle_mouse_motion(event: InputEventMouseMotion):
-	if drag_start != Vector2.INF:
+	if drag_position != Vector2.INF:
 		# We are dragging, so we need to move all selected handles.
-		var delta = canvas.get_global_mouse_position() - drag_start
-		canvas.apply_on_selection(func(handle): handle.preview_drag(delta))
+		var mouse_position = canvas.get_global_mouse_position()
+		var delta = mouse_position - drag_position
+		canvas.move_selected_handles_by(delta)
+		drag_position = mouse_position
 
 	if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 		canvas.selection_box.move_selection()
@@ -113,9 +116,9 @@ func edge_input_event(edge: Edge, event: InputEvent):
 				edge_on_which_click_started = edge
 			else:
 				if edge_on_which_click_started == edge:
-					canvas.deselect_all()
-					canvas.select(edge.left_handle)
-					canvas.select(edge.right_handle)
+					canvas.deselect_all_handles()
+					canvas.select_handle(edge.left_handle)
+					canvas.select_handle(edge.right_handle)
 				edge_on_which_click_started = null
 
 
@@ -139,3 +142,4 @@ func unhandled_input(event):
 		print("Saving to file...")
 		print(OS.get_user_data_dir())
 		canvas.saveToFile()
+

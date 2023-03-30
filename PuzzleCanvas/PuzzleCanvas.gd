@@ -22,8 +22,8 @@ var current_selection: Dictionary = Dictionary()
 signal selection_changed
 
 func _ready():
-	var w = 7
-	var h = 5
+	var w = 50
+	var h = 50
 	
 	for x in range(0, w):
 		for y in range(0, h):
@@ -51,6 +51,10 @@ func _ready():
 			if x == 0 or x == w - 1:
 				edge.make_straight()
 
+## Project a point onto the puzzle canvas
+func project_onto_canvas(point: Vector2):
+	return point
+
 ## Creates an edge between the two handles.
 func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
@@ -75,6 +79,7 @@ func find_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 	return null
 
 
+## Returns an array containing all currently selected edges
 func get_selected_edges() -> Array:
 	var result = []
 	for edge in edges:
@@ -82,36 +87,47 @@ func get_selected_edges() -> Array:
 			result.append(edge)
 	return result
 
+## Remove an edge from the puzzle canvas
 func delete_edge(edge: Edge):
 	edges.erase(edge)
 	edge.queue_free()
 	selection_changed.emit()
+
+## Move a handle to a target position. If this position is outside of
+## the bounding box, project the handle onto it. *All* modifications
+## of a handle's position should go through this function.
+func move_handle_to(handle: DragDropHandle, target_position: Vector2):
+	var new_position = project_onto_canvas(target_position)
+	if handle.position != new_position:
+		handle.position = new_position
+		handle.position_changed.emit()
+
+## Translate a handle by an offset vector, respecting the canvas bounding box
+func move_handle_by(handle: DragDropHandle, delta: Vector2):
+	var target_position = handle.position + delta
+	move_handle_to(handle, target_position)
+
+## Notify handle that a dragging event starts
+func drag_handle_start(handle: DragDropHandle):
+	handle.store_position(handle.position)
+
+## Notify handle that a dragging event finished sucessfully
+func drag_handle_end(handle: DragDropHandle):
+	handle.unstore_position()
 	
-
-## Applies a function to all currently selected handles. (Vertices)
-## It also applies on the current hover if it is not selected.
-func apply_on_selection(fkt):
-	for any_handle in current_selection:
-		fkt.call(any_handle)
-	if current_hover != null and current_hover not in current_selection:
-		fkt.call(current_hover)
-		
-
-
-func _unhandled_input(event):
-	state_machine.unhandled_input(event)
-
-
+## Notify handle that a dragging event was aborted
+func drag_handle_rollback(handle: DragDropHandle):
+	move_handle_to(handle, handle.restore_position())
 
 ## Removes a handle from the selection set, if it is inside.
-func deselect(handle):
+func deselect_handle(handle):
 	current_selection.erase(handle)
 	handle.selected = false
 	selection_changed.emit()
 
 
 ## Removes all handles from the selection set.
-func deselect_all():
+func deselect_all_handles():
 	for handle in current_selection:
 		handle.selected = false
 	current_selection.clear()
@@ -119,10 +135,23 @@ func deselect_all():
 
 
 ## Adds a handle to the selection set.
-func select(handle):
+func select_handle(handle):
 	current_selection[handle] = true
 	handle.selected = true
 	selection_changed.emit()
+
+## Applies a function to all currently selected handles. (Vertices)
+## It also applies on the current hover if it is not selected.
+func apply_on_selected_handles(fkt):
+	for any_handle in current_selection:
+		fkt.call(any_handle)
+	if current_hover != null and current_hover not in current_selection:
+		fkt.call(current_hover)
+
+func move_selected_handles_by(delta: Vector2):
+	apply_on_selected_handles(func(handle): move_handle_by(handle, delta))
+
+
 
 
 func saveToFile():
@@ -146,3 +175,6 @@ func edge_path(edge: Edge) -> String:
 	svg_path = svg_path.trim_suffix(" L ")
 
 	return svg_path
+
+func _unhandled_input(event):
+	state_machine.unhandled_input(event)
