@@ -84,7 +84,7 @@ func handle_mouse_motion(event: InputEventMouseMotion):
 		var mouse_position = canvas.get_global_mouse_position()
 		var delta = mouse_position - drag_position
 		canvas.move_selected_handles_by(delta)
-		drag_position = mouse_position
+		drag_position = canvas.project_onto_bbox(mouse_position)
 
 	if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 		canvas.selection_box.move_selection()

@@ -8,7 +8,8 @@ var edge_scene = preload("res://Edge/edge.tscn")
 
 @onready var selection_box = $SelectionBox
 
-var points = {}
+var bbox: Rect2
+var positions = {}
 var edges = []
 
 var current_hover = null
@@ -21,15 +22,39 @@ var current_selection: Dictionary = Dictionary()
 ## Triggered when the selection changes.
 signal selection_changed
 
+func set_bbox(rect: Rect2):
+	bbox = rect
+	var points = PackedVector2Array()
+	points.append(bbox.position)
+	points.append(bbox.position + Vector2(bbox.size.x, 0))
+	points.append(bbox.position + bbox.size)
+	points.append(bbox.position + Vector2(0, bbox.size.y))
+	points.append(bbox.position)
+	$BBox/Line2D.points = points
+	update_zoom(camera.zoom)
+
+func update_zoom(zoom):
+	$BBox/Line2D.width = 7 / zoom.x
+
+## Project a point onto the puzzle canvas
+func project_onto_bbox(point: Vector2):
+	var projected_point = point.clamp(bbox.position, bbox.position + bbox.size)
+	return projected_point
+
+
 func _ready():
-	var w = 50
-	var h = 50
+	var w = 7
+	var h = 5
+
+	var sharp_bbox = Rect2(Vector2(205, 105), Vector2((w-1) * 150, (h-1) * 150))
+	set_bbox(sharp_bbox)
+	camera.zoom_changed.connect(update_zoom)
 	
 	for x in range(0, w):
 		for y in range(0, h):
 			var handle = handle_scene.instantiate()
-			points[Vector2i(x, y)] = handle
-			handle.position = Vector2(150 * x + 205, 150 * y + 105)
+			positions[Vector2i(x, y)] = handle
+			move_handle_to(handle, Vector2(150 * x + 205, 150 * y + 105))
 			handle.z_index = 2
 			handle.camera = camera
 
@@ -41,19 +66,17 @@ func _ready():
 
 	for x in range(1, w):
 		for y in range(0, h):
-			var edge = create_edge(points[Vector2i(x - 1, y)], points[Vector2i(x, y)])
+			var edge = create_edge(positions[Vector2i(x - 1, y)], positions[Vector2i(x, y)])
 			if y == 0 or y == h - 1:
 				edge.make_straight()
 
 	for x in range(0, w):
 		for y in range(1, h):
-			var edge = create_edge(points[Vector2i(x, y - 1)], points[Vector2i(x, y)])
+			var edge = create_edge(positions[Vector2i(x, y - 1)], positions[Vector2i(x, y)])
 			if x == 0 or x == w - 1:
 				edge.make_straight()
 
-## Project a point onto the puzzle canvas
-func project_onto_canvas(point: Vector2):
-	return point
+
 
 ## Creates an edge between the two handles.
 func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
@@ -97,7 +120,7 @@ func delete_edge(edge: Edge):
 ## the bounding box, project the handle onto it. *All* modifications
 ## of a handle's position should go through this function.
 func move_handle_to(handle: DragDropHandle, target_position: Vector2):
-	var new_position = project_onto_canvas(target_position)
+	var new_position = project_onto_bbox(target_position)
 	if handle.position != new_position:
 		handle.position = new_position
 		handle.position_changed.emit()
