@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=6 format=3 uid="uid://cqq8meapgi251"]
 
 [ext_resource type="Script" path="res://PuzzleCanvas/PuzzleCanvas.gd" id="1_y76fk"]
 [ext_resource type="Script" path="res://UI/SelectionBox.gd" id="2_yor7s"]

@@ -31,7 +31,7 @@ func _ready():
 		for y in range(0, h):
 			var handle = handle_scene.instantiate()
 			points[Vector2i(x, y)] = handle
-			handle.position = Vector2(150 * x, 150 * y)
+			handle.position = Vector2(150 * x + 205, 150 * y + 105)
 			handle.z_index = 2
 			handle.camera = camera
 
