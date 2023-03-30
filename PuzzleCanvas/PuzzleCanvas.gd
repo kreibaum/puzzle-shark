@@ -1,7 +1,7 @@
 class_name PuzzleCanvas extends Node2D
 
 var handle_scene = preload("res://drag_drop_handle.tscn")
-var edge_scene = preload("res://edge.tscn")
+var edge_scene = preload("res://Edge/edge.tscn")
 
 @export var camera: Camera2D
 

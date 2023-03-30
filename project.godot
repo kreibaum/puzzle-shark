@@ -14,7 +14,7 @@ config/name="Puzzle Shark"
 run/main_scene="res://editor.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 run/low_processor_mode=true
-config/icon="res://icon.svg"
+config/icon="res://Assets/icon.svg"
 
 [display]
 

@@ -1,12 +1,12 @@
-[gd_scene load_steps=10 format=3 uid="uid://caibbyl7lcvdq"]
+[gd_scene load_steps=10 format=3 uid="uid://61gu0hssk52h"]
 
-[ext_resource type="Script" path="res://PanCamera.gd" id="1_8jika"]
-[ext_resource type="PackedScene" uid="uid://dlgf7q63selrp" path="res://puzzle_canvas.tscn" id="2_hetub"]
-[ext_resource type="Texture2D" uid="uid://dxt53gumvtia8" path="res://Pulau_Padar.jpg" id="3_21ddy"]
-[ext_resource type="Script" path="res://RandomizeEdgeButton.gd" id="4_nlaqt"]
-[ext_resource type="Script" path="res://AddEdgeButton.gd" id="5_sxt5f"]
-[ext_resource type="Script" path="res://DeleteEdgeButton.gd" id="6_kqwcc"]
-[ext_resource type="Script" path="res://EdgeInspector.gd" id="7_8j4v5"]
+[ext_resource type="Script" path="res://UI/PanCamera.gd" id="1_bwty5"]
+[ext_resource type="PackedScene" path="res://PuzzleCanvas/puzzle_canvas.tscn" id="2_hetub"]
+[ext_resource type="Texture2D" uid="uid://dxt53gumvtia8" path="res://Assets/Pulau_Padar.jpg" id="3_f3am2"]
+[ext_resource type="Script" path="res://UI/RandomizeEdgeButton.gd" id="4_ruoih"]
+[ext_resource type="Script" path="res://UI/AddEdgeButton.gd" id="5_q1ol5"]
+[ext_resource type="Script" path="res://UI/DeleteEdgeButton.gd" id="6_l2tq3"]
+[ext_resource type="Script" path="res://UI/EdgeInspector.gd" id="7_ydjap"]
 
 [sub_resource type="Theme" id="Theme_mnow6"]
 resource_name = "ButtonTheme"
@@ -19,7 +19,7 @@ resource_name = "ToolSelected"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 anchor_mode = 0
-script = ExtResource("1_8jika")
+script = ExtResource("1_bwty5")
 
 [node name="PuzzleCanvas" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_hetub")]
 camera = NodePath("../Camera2D")
@@ -28,7 +28,7 @@ camera = NodePath("../Camera2D")
 z_index = -1
 position = Vector2(453, 300)
 scale = Vector2(0.306625, 0.306625)
-texture = ExtResource("3_21ddy")
+texture = ExtResource("3_f3am2")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -41,19 +41,19 @@ offset_bottom = 110.0
 [node name="RandomizeEdgeButton" type="Button" parent="CanvasLayer/VBoxContainer" node_paths=PackedStringArray("canvas")]
 layout_mode = 2
 text = "Randomize Edge"
-script = ExtResource("4_nlaqt")
+script = ExtResource("4_ruoih")
 canvas = NodePath("../../../PuzzleCanvas")
 
 [node name="AddEdgeButton" type="Button" parent="CanvasLayer/VBoxContainer" node_paths=PackedStringArray("canvas")]
 layout_mode = 2
 text = "Add Edge"
-script = ExtResource("5_sxt5f")
+script = ExtResource("5_q1ol5")
 canvas = NodePath("../../../PuzzleCanvas")
 
 [node name="DeleteEdgeButton" type="Button" parent="CanvasLayer/VBoxContainer" node_paths=PackedStringArray("canvas")]
 layout_mode = 2
 text = "Delete Edge"
-script = ExtResource("6_kqwcc")
+script = ExtResource("6_l2tq3")
 canvas = NodePath("../../../PuzzleCanvas")
 
 [node name="SelectionToolButton" type="Button" parent="CanvasLayer/VBoxContainer"]
@@ -76,7 +76,7 @@ offset_left = 11.0
 offset_top = 237.0
 offset_right = 143.0
 offset_bottom = 352.0
-script = ExtResource("7_8j4v5")
+script = ExtResource("7_ydjap")
 canvas = NodePath("../../PuzzleCanvas")
 
 [node name="SelectionLabel" type="Label" parent="CanvasLayer/EdgeInspector"]

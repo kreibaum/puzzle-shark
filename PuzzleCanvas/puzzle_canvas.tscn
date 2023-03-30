@@ -1,9 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://dlgf7q63selrp"]
+[gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://PuzzleCanvas.gd" id="1_y76fk"]
-[ext_resource type="Script" path="res://SelectionBox.gd" id="2_yor7s"]
-[ext_resource type="Script" path="res://EdgeGenerator.gd" id="3_ye8um"]
-[ext_resource type="Script" path="res://EdgeTemplate.gd" id="4_4oj1y"]
+[ext_resource type="Script" path="res://PuzzleCanvas/PuzzleCanvas.gd" id="1_y76fk"]
+[ext_resource type="Script" path="res://UI/SelectionBox.gd" id="2_yor7s"]
+[ext_resource type="Script" path="res://Edge/EdgeGenerator.gd" id="3_ye8um"]
+[ext_resource type="Script" path="res://Edge/EdgeTemplate.gd" id="4_4oj1y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_awmdd"]
 size = Vector2(1, 1)
