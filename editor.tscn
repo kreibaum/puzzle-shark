@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://61gu0hssk52h"]
+[gd_scene load_steps=9 format=3 uid="uid://61gu0hssk52h"]
 
 [ext_resource type="Script" path="res://UI/PanCamera.gd" id="1_bwty5"]
 [ext_resource type="PackedScene" uid="uid://cqq8meapgi251" path="res://PuzzleCanvas/puzzle_canvas.tscn" id="2_hetub"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://UI/AddEdgeButton.gd" id="5_q1ol5"]
 [ext_resource type="Script" path="res://UI/DeleteEdgeButton.gd" id="6_l2tq3"]
 [ext_resource type="Script" path="res://UI/EdgeInspector.gd" id="7_ydjap"]
+[ext_resource type="Script" path="res://UI/StateMachine.gd" id="8_ac1sk"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -14,7 +15,8 @@
 anchor_mode = 0
 script = ExtResource("1_bwty5")
 
-[node name="PuzzleCanvas" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_hetub")]
+[node name="PuzzleCanvas" parent="." node_paths=PackedStringArray("state_machine", "camera") instance=ExtResource("2_hetub")]
+state_machine = NodePath("../StateMachine")
 camera = NodePath("../Camera2D")
 
 [node name="BackgroundImage" type="Sprite2D" parent="."]
@@ -107,3 +109,7 @@ item_0/text = "Select"
 item_1/text = "Node"
 item_2/text = "Edge"
 item_3/text = "Sculpt"
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("canvas")]
+script = ExtResource("8_ac1sk")
+canvas = NodePath("../PuzzleCanvas")
