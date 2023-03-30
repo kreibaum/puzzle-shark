@@ -16,6 +16,8 @@ var color: Color = Color.WHITE
 var color_default: Color = Color.WHITE
 var color_collision: Color = Color.RED
 
+var bounding_box: Rect2 = Rect2()
+
 
 func set_points_before_init(new_points: PackedVector2Array):
 	self.points = new_points
@@ -79,6 +81,14 @@ func update_carea(force = false):
 	if force or target_baseline.distance_to(self.baseline) > 0.1:
 		self.baseline = target_baseline
 		$EdgeCollisionArea.recalculate(self.points, 9 / self.scale.x)
+		# Get the bounding box of the collision area. We do this by taking
+		# the max and min of the x and y coordinates of all points in the
+		# collision polygon.
+		var polygon = $EdgeCollisionArea/Polygon.polygon
+		var rect = Rect2()
+		for point in polygon:
+			rect = rect.expand(point)
+		self.bounding_box = rect
 
 
 # Construct the transformation matrix that maps the node polyline to its handles
@@ -110,9 +120,21 @@ func _process(_delta):
 		update_carea(false)
 		queue_redraw()
 
-	if $EdgeCollisionArea.monitoring:
-		var collisions = $EdgeCollisionArea.get_overlapping_areas()
-		if collisions.size() > 0:
-			set_color(self.color_collision)
-		else:
-			set_color(self.color_default)
+	# if $EdgeCollisionArea.monitoring:
+	# 	var collisions = $EdgeCollisionArea.get_overlapping_areas()
+	# 	if collisions.size() > 0:
+	# 		set_color(self.color_collision)
+	# 	else:
+	# 		set_color(self.color_default)
+
+
+func check_collision_against(other: Edge) -> bool:
+	return (
+		Geometry2D.intersect_polygons(self.collision_polygon(), other.collision_polygon()).size()
+		> 0
+	)
+
+
+func collision_polygon() -> PackedVector2Array:
+	print(transform * bounding_box)
+	return transform * $EdgeCollisionArea/Polygon.polygon

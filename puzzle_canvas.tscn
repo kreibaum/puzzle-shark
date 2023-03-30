@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://dlgf7q63selrp"]
+[gd_scene load_steps=7 format=3 uid="uid://dlgf7q63selrp"]
 
 [ext_resource type="Script" path="res://PuzzleCanvas.gd" id="1_y76fk"]
 [ext_resource type="Script" path="res://SelectionBox.gd" id="2_yor7s"]
 [ext_resource type="Script" path="res://EdgeGenerator.gd" id="3_ye8um"]
 [ext_resource type="Script" path="res://EdgeTemplate.gd" id="4_4oj1y"]
+[ext_resource type="Script" path="res://AsyncCollisionManager.gd" id="5_gl6cp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_awmdd"]
 size = Vector2(1, 1)
@@ -60,3 +61,6 @@ points = PackedVector2Array(700, 200, 900, 200)
 script = ExtResource("4_4oj1y")
 frequency = 0.0
 template_name = "Strait"
+
+[node name="AsyncCollisionManager" type="Node" parent="."]
+script = ExtResource("5_gl6cp")
