@@ -59,13 +59,15 @@ func is_ctrl_s_down(event) -> bool:
 func handle_mouse_release():
 	# Are we dragging? If so, we need to commit the drag.
 	if drag_position != Vector2.INF:
-		var delta = canvas.get_global_mouse_position() - drag_position
+		var mouse_position = canvas.get_global_mouse_position() 
+		var mouse_position_bbox = canvas.project_bbox(mouse_position)
+		var delta = mouse_position_bbox - drag_position
 		canvas.move_selected_handles_by(delta)
 		canvas.apply_on_selected_handles(canvas.drag_handle_end)
 		drag_position = Vector2.INF
 
 	# We also commit the selection box, if we have one:
-	if canvas.selection_box.is_selecting:
+	elif canvas.selection_box.is_selecting:
 		# Is this adding to the selection?
 		if !is_additive_selection():
 			# Exclusive mode, so we deselect everything else.
@@ -82,9 +84,10 @@ func handle_mouse_motion(event: InputEventMouseMotion):
 	if drag_position != Vector2.INF:
 		# We are dragging, so we need to move all selected handles.
 		var mouse_position = canvas.get_global_mouse_position()
-		var delta = mouse_position - drag_position
+		var mouse_position_bbox = canvas.project_bbox(mouse_position)
+		var delta = mouse_position_bbox - drag_position
 		canvas.move_selected_handles_by(delta)
-		drag_position = canvas.project_onto_bbox(mouse_position)
+		drag_position = mouse_position_bbox #canvas.project_bbox(mouse_position)
 
 	if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 		canvas.selection_box.move_selection()

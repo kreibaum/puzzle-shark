@@ -22,6 +22,7 @@ var current_selection: Dictionary = Dictionary()
 ## Triggered when the selection changes.
 signal selection_changed
 
+## Set the bounding box of the puzzle canvas
 func set_bbox(rect: Rect2):
 	bbox = rect
 	var points = PackedVector2Array()
@@ -30,16 +31,29 @@ func set_bbox(rect: Rect2):
 	points.append(bbox.position + bbox.size)
 	points.append(bbox.position + Vector2(0, bbox.size.y))
 	points.append(bbox.position)
-	$BBox/Line2D.points = points
+	$BBox/Line2D.set_points(points)
+	$BBox/Polygon2D.set_polygon(points)
 	update_zoom(camera.zoom)
 
+## The line thickness of the bbox is zoom-dependent
 func update_zoom(zoom):
 	$BBox/Line2D.width = 7 / zoom.x
 
-## Project a point onto the puzzle canvas
-func project_onto_bbox(point: Vector2):
-	var projected_point = point.clamp(bbox.position, bbox.position + bbox.size)
-	return projected_point
+
+## Project a point onto the puzzle canvas bbox
+func project_bbox(point: Vector2):
+	return point.clamp(bbox.position, bbox.position + bbox.size)
+
+
+## Enforce all handle constraints. If the handle has the flags
+## fixed_horizontal or fixed_vertical set to true, their y or x
+## positions are not changed (unless required by the bbox projection)
+func enforce_constraints(handle : DragDropHandle, point: Vector2):
+	if handle.fixed_horizontal:
+		point.y = handle.position.y
+	if handle.fixed_vertical:
+		point.x = handle.position.x
+	return project_bbox(point)
 
 
 func _ready():
@@ -63,6 +77,9 @@ func _ready():
 			handle.captured_input_event.connect(state_machine.drag_drop_handle_input_event)
 			handle.captured_hover_event.connect(state_machine.drag_drop_handle_hover_event)
 			add_child(handle)
+
+			if x == 0 or x == w - 1: handle.fix_vertical()
+			if y == 0 or y == h - 1: handle.fix_horizontal()
 
 	for x in range(1, w):
 		for y in range(0, h):
@@ -120,7 +137,7 @@ func delete_edge(edge: Edge):
 ## the bounding box, project the handle onto it. *All* modifications
 ## of a handle's position should go through this function.
 func move_handle_to(handle: DragDropHandle, target_position: Vector2):
-	var new_position = project_onto_bbox(target_position)
+	var new_position = enforce_constraints(handle, target_position)
 	if handle.position != new_position:
 		handle.position = new_position
 		handle.position_changed.emit()
@@ -199,5 +216,6 @@ func edge_path(edge: Edge) -> String:
 
 	return svg_path
 
+## Pass along unhandled input to the state machine
 func _unhandled_input(event):
 	state_machine.unhandled_input(event)

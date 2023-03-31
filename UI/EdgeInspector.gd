@@ -31,7 +31,8 @@ func _on_selection_changed():
 		var transform = FixedPointTransform2D.build_transformation_matrix(
 			points[0], points[-1], Vector2(5, h / 2), Vector2(w, h / 2)
 		)
-		$SingleEdgeView/LinePreview.points = transform * points
+		if transform:
+			$SingleEdgeView/LinePreview.points = transform * points
 
 	else:
 		$SelectionLabel.text = "%d Edges" % edge_count
