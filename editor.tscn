@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://61gu0hssk52h"]
+[gd_scene load_steps=10 format=3 uid="uid://61gu0hssk52h"]
 
 [ext_resource type="Script" path="res://UI/PanCamera.gd" id="1_bwty5"]
 [ext_resource type="PackedScene" uid="uid://cqq8meapgi251" path="res://PuzzleCanvas/puzzle_canvas.tscn" id="2_hetub"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://UI/DeleteEdgeButton.gd" id="6_l2tq3"]
 [ext_resource type="Script" path="res://UI/EdgeInspector.gd" id="7_ydjap"]
 [ext_resource type="Script" path="res://UI/StateMachine.gd" id="8_ac1sk"]
+[ext_resource type="Script" path="res://UI/StateGrid.gd" id="8_qgcry"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -97,18 +98,24 @@ custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 text = ">"
 
-[node name="ItemList" type="ItemList" parent="CanvasLayer"]
+[node name="StateGrid" type="ItemList" parent="CanvasLayer" node_paths=PackedStringArray("state_machine")]
 offset_left = 13.0
 offset_top = 12.0
-offset_right = 148.0
-offset_bottom = 91.0
+offset_right = 177.0
+offset_bottom = 101.0
 max_text_lines = 2
-item_count = 4
+text_overrun_behavior = 0
+item_count = 5
 max_columns = 2
+same_column_width = true
+fixed_column_width = 50
 item_0/text = "Select"
 item_1/text = "Node"
 item_2/text = "Edge"
 item_3/text = "Sculpt"
+item_4/text = "Items for ex."
+script = ExtResource("8_qgcry")
+state_machine = NodePath("../../StateMachine")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("canvas")]
 script = ExtResource("8_ac1sk")
