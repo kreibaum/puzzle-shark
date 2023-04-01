@@ -23,7 +23,7 @@ func set_points_before_init(new_points: PackedVector2Array):
 
 func _draw():
 	# A width of -1 always creates a visually thin line
-	draw_polyline(self.points, self.color, -1, true)
+	draw_polyline(self.points, self.color, -1, false)
 
 
 # TODO: This should be combined with some general shape management code.
@@ -70,7 +70,17 @@ func query_update_position():
 # of the handles moves.
 func update_position():
 	var transformation = build_transformation_matrix()
-	set_transform(transformation)
+	# Check if the transformation is valid. It is invalid if the left and
+	# right handles are too close together in canvas-space. In this case,
+	# setting the transformation would lead to a c++ error down the line.
+	if transformation:
+		if $EdgeCollisionArea.is_disabled():
+			update_carea(true)
+		set_transform(transformation)
+	else:
+		# If we do not set a new transformation due to invaliditdy,
+		# we should disable the edge
+		$EdgeCollisionArea.disable()
 
 
 # Update the collision area of the edge
@@ -82,7 +92,7 @@ func update_carea(force = false):
 
 
 # Construct the transformation matrix that maps the node polyline to its handles
-func build_transformation_matrix() -> Transform2D:
+func build_transformation_matrix():
 	var left: Vector2 = self.points[0]
 	var right: Vector2 = self.points[-1]
 
@@ -95,7 +105,7 @@ func build_transformation_matrix() -> Transform2D:
 func get_shape_points() -> PackedVector2Array:
 	return self.transform * self.points
 
-
+# Set the color of the edge
 func set_color(col: Color):
 	if self.color != col:
 		self.color = col
