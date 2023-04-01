@@ -32,6 +32,7 @@ func _ready():
 	clear()
 	for state in state_definitions():
 		add_item(state[LABEL_INDEX])
+	select(0)
 
 
 ## Changes the current state of the state machine to the given state.

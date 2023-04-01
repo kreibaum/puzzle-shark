@@ -52,17 +52,8 @@ func _ready():
 	
 	for x in range(0, w):
 		for y in range(0, h):
-			var handle = handle_scene.instantiate()
+			var handle = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
 			positions[Vector2i(x, y)] = handle
-			move_handle_to(handle, Vector2(150 * x + 205, 150 * y + 105))
-			handle.z_index = 2
-			handle.camera = camera
-
-			# Since all events potentially affect multiple handles, we delegate
-			# the events to the canvas (Self), which can then handle them.
-			handle.captured_input_event.connect(state_machine.drag_drop_handle_input_event)
-			handle.captured_hover_event.connect(state_machine.drag_drop_handle_hover_event)
-			add_child(handle)
 
 	for x in range(1, w):
 		for y in range(0, h):
@@ -76,6 +67,19 @@ func _ready():
 			if x == 0 or x == w - 1:
 				edge.make_straight()
 
+## Creates a new vertex and adds it to the canvas.
+func create_vertex( target_position :Vector2 ) -> DragDropHandle:
+	var handle = handle_scene.instantiate()
+	move_handle_to(handle, target_position)
+	handle.z_index = 2
+	handle.camera = camera
+
+	# Since all events potentially affect multiple handles, we delegate
+	# the events to the canvas (Self), which can then handle them.
+	handle.captured_input_event.connect(state_machine.drag_drop_handle_input_event)
+	handle.captured_hover_event.connect(state_machine.drag_drop_handle_hover_event)
+	add_child(handle)
+	return handle
 
 
 ## Creates an edge between the two handles.

@@ -117,6 +117,7 @@ item_4/text = "Items for ex."
 script = ExtResource("8_qgcry")
 state_machine = NodePath("../../StateMachine")
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("canvas")]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("canvas", "ui_canvas")]
 script = ExtResource("8_ac1sk")
 canvas = NodePath("../PuzzleCanvas")
+ui_canvas = NodePath("../CanvasLayer")

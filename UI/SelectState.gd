@@ -4,11 +4,6 @@ class_name SelectState extends State
 var drag_position: Vector2 = Vector2.INF
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass  # Replace with function body.
-
-
 func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -54,6 +49,7 @@ func is_ctrl_s_down(event) -> bool:
 	return (
 		event is InputEventKey and event.keycode == KEY_S and event.ctrl_pressed and event.pressed
 	)
+
 
 ## Handles release of the left mouse button.
 func handle_mouse_release():
@@ -142,4 +138,3 @@ func unhandled_input(event):
 		print("Saving to file...")
 		print(OS.get_user_data_dir())
 		canvas.saveToFile()
-
