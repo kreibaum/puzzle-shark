@@ -13,6 +13,7 @@ var edges = []
 
 var current_hover = null
 
+
 # We can only use a dictionary, there are no dedicated sets.
 # The actual value does not matter.
 ## The set of currently selected vertices.
@@ -86,8 +87,9 @@ func _ready():
 				edge.make_straight()
 
 ## Creates a new vertex and adds it to the canvas.
-func create_vertex(target_position: Vector2) -> Vertex:
+func create_vertex(target_position: Vector2, substance = Vertex.SUBSTANCE.ACTUAL) -> Vertex:
 	var vertex = vertex_scene.instantiate()
+	vertex.set_substance( substance )
 	move_vertex_to(vertex, target_position)
 	vertex.z_index = 2
 	vertex.camera = camera

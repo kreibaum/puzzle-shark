@@ -62,9 +62,8 @@ func unhandled_input(event):
 			canvas.delete_vertex(vertex)
 
 
-
 ## A squares that goes from -10 to 10 in both x and y
-func get_square() -> Polygon2D:
+static func get_square() -> Polygon2D:
 	var points = PackedVector2Array()
 	points.append(Vector2(-10, -10))
 	points.append(Vector2(-10, 10))

@@ -5,7 +5,27 @@ var stored_position: Vector2 = Vector2.INF
 var fixed_horizontal: bool = false
 var fixed_vertical: bool = false
 
+enum SUBSTANCE {
+	VIRTUAL,
+	ACTUAL,
+}
 
+var substance: SUBSTANCE = SUBSTANCE.ACTUAL
+
+
+## Sets the "substance" of the vertex. This is how "Real" the vertex is.
+## Basically a more readable version of an is_virtual boolean.
+func set_substance(new_substance: SUBSTANCE):
+	substance = new_substance
+	if substance == SUBSTANCE.VIRTUAL:
+		self.modulate = Color(1, 1, 1, 0.5)
+		$CollisionShape2D.disabled = true
+	else:
+		self.modulate = Color(1, 1, 1, 1)
+		$CollisionShape2D.disabled = false
+
+
+## And indicator if the vertex movement is locked in any direction.
 func set_inset():
 	var points = PackedVector2Array()
 	if not fixed_horizontal and not fixed_vertical:
