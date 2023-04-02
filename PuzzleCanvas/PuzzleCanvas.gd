@@ -86,11 +86,12 @@ func _ready():
 				edge.make_straight()
 
 ## Creates a new vertex and adds it to the canvas.
-func create_vertex( target_position :Vector2 ) -> Vertex:
+func create_vertex(target_position: Vector2) -> Vertex:
 	var vertex = vertex_scene.instantiate()
 	move_vertex_to(vertex, target_position)
 	vertex.z_index = 2
 	vertex.camera = camera
+	vertex.update_zoom(camera.zoom)
 
 	# Since all events potentially affect multiple vertices, we delegate
 	# the events to the canvas (Self), which can then handle them.
