@@ -49,11 +49,12 @@ func project_bbox(point: Vector2):
 ## fixed_horizontal or fixed_vertical set to true, their y or x
 ## positions are not changed (unless required by the bbox projection)
 func enforce_constraints(handle : DragDropHandle, point: Vector2):
+	var new_point = Vector2(point)
 	if handle.fixed_horizontal:
-		point.y = handle.position.y
+		new_point.y = handle.position.y
 	if handle.fixed_vertical:
-		point.x = handle.position.x
-	return project_bbox(point)
+		new_point.x = handle.position.x
+	return project_bbox(new_point)
 
 
 func _ready():

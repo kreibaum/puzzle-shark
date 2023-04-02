@@ -1,7 +1,22 @@
 class_name SelectState extends State
 
 # Variables related to dragging. INF means we are not dragging.
+## The constrained mouse position in the last frame while we were dragging.
 var drag_position: Vector2 = Vector2.INF
+## The vertex that is used to execute drag operations. This is important for
+## properly constraining the drag.
+var drag_vertex: DragDropHandle = null
+
+
+func remember_drag_start(vertex: DragDropHandle):
+	drag_position = canvas.get_global_mouse_position()
+	drag_position = canvas.enforce_constraints(vertex, drag_position)
+	drag_vertex = vertex
+
+
+func clear_drag_start():
+	drag_position = Vector2.INF
+	drag_vertex = null
 
 
 func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
@@ -10,7 +25,7 @@ func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
 			if event.pressed:
 				# We are now dragging.
 				canvas.apply_on_selected_handles(canvas.drag_handle_start)
-				drag_position = canvas.get_global_mouse_position()
+				remember_drag_start(handle)
 			else:
 				# Is this adding to the selection?
 				if is_additive_selection():
@@ -27,7 +42,7 @@ func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			# Rollback the drag.
 			canvas.apply_on_selected_handles(canvas.drag_handle_rollback)
-			drag_position = Vector2.INF
+			clear_drag_start()
 
 			# Remove the selection box without effect.
 			canvas.selection_box.end_selection()
@@ -55,12 +70,12 @@ func is_ctrl_s_down(event) -> bool:
 func handle_mouse_release():
 	# Are we dragging? If so, we need to commit the drag.
 	if drag_position != Vector2.INF:
-		var mouse_position = canvas.get_global_mouse_position() 
-		var mouse_position_bbox = canvas.project_bbox(mouse_position)
+		var mouse_position = canvas.get_global_mouse_position()
+		var mouse_position_bbox = canvas.enforce_constraints(drag_vertex, mouse_position)
 		var delta = mouse_position_bbox - drag_position
 		canvas.move_selected_handles_by(delta)
 		canvas.apply_on_selected_handles(canvas.drag_handle_end)
-		drag_position = Vector2.INF
+		clear_drag_start()
 
 	# We also commit the selection box, if we have one:
 	elif canvas.selection_box.is_selecting:
@@ -80,10 +95,10 @@ func handle_mouse_motion(event: InputEventMouseMotion):
 	if drag_position != Vector2.INF:
 		# We are dragging, so we need to move all selected handles.
 		var mouse_position = canvas.get_global_mouse_position()
-		var mouse_position_bbox = canvas.project_bbox(mouse_position)
-		var delta = mouse_position_bbox - drag_position
+		var mouse_position_constrained = canvas.enforce_constraints(drag_vertex, mouse_position)
+		var delta = mouse_position_constrained - drag_position
 		canvas.move_selected_handles_by(delta)
-		drag_position = mouse_position_bbox #canvas.project_bbox(mouse_position)
+		drag_position = mouse_position_constrained  #canvas.project_bbox(mouse_position)
 
 	if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 		canvas.selection_box.move_selection()
