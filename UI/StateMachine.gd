@@ -8,7 +8,7 @@ var current_state: State
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	current_state = SelectState.new()
+	current_state = SelectTool.new()
 	current_state.enter_state(canvas, ui_canvas)
 
 

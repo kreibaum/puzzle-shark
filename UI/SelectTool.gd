@@ -1,4 +1,4 @@
-class_name SelectState extends State
+class_name SelectTool extends State
 
 # Variables related to dragging. INF means we are not dragging.
 ## The constrained mouse position in the last frame while we were dragging.

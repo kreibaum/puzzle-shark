@@ -1,4 +1,4 @@
-class_name EdgeState extends State
+class_name CreateTool extends State
 
 ## The edge state can be used to easily modify properties of edges and to
 ## create new edges between specific nodes.

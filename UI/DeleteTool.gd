@@ -1,4 +1,4 @@
-class_name NodeState extends State
+class_name DeleteTool extends State
 
 ## This state makes a ghost vertex follow the mouse. By clicking you place it
 ## and it becomes a real vertex. By clicking on a vertex you can move it.

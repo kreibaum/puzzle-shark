@@ -19,10 +19,10 @@ const CONSTRUCTOR_INDEX = 2
 
 func state_definitions():
 	return [
-		["Select", KEY_X, func(): return SelectState.new()],
-		["Node", KEY_V, func(): return NodeState.new()],
-		["Edge", KEY_U, func(): return EdgeState.new()],
-		["Sculpt", KEY_I, func(): return SelectState.new()]
+		["Select", KEY_X, func(): return SelectTool.new()],
+		["Delete", KEY_V, func(): return DeleteTool.new()],
+		["Create", KEY_U, func(): return CreateTool.new()],
+		["Sculpt", KEY_I, func(): return SelectTool.new()]
 	]
 
 
