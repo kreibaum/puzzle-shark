@@ -139,6 +139,16 @@ func delete_edge(edge: Edge):
 	edge.queue_free()
 	selection_changed.emit()
 
+func delete_vertex(vertex: Vertex):
+	for index in range(len(edges)-1, -1, -1):
+		var edge = edges[index]
+		if edge.is_connected_to(vertex):
+			edge.queue_free()
+			edges.remove_at(index)
+	deselect_vertex(vertex)
+	vertex.queue_free()
+			
+
 ## Move a vertex to a target position. If this position is outside of
 ## the bounding box, project the vertex onto it. *All* modifications
 ## of a vertex' position should go through this function.

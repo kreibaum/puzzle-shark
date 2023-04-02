@@ -112,6 +112,9 @@ func set_color(col: Color):
 		self.color = col
 		queue_redraw()
 
+## Check if a vertex is part of this edge
+func is_connected_to(vertex: Vertex):
+	return left_vertex == vertex or right_vertex == vertex
 
 ## Check for overlap with another edge.
 func _process(_delta):

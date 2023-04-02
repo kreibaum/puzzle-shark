@@ -53,6 +53,10 @@ func unhandled_input(event):
 			canvas.deselect_all_vertices()
 			canvas.select_vertex(vertex)
 			preview.visible = canvas.current_hover == null
+		elif canvas.current_hover != null && event.button_index == MOUSE_BUTTON_RIGHT:
+			canvas.delete_vertex(canvas.current_hover)
+			canvas.current_hover = null
+
 
 
 ## A squares that goes from -10 to 10 in both x and y

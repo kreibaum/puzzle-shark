@@ -4,7 +4,7 @@ class_name SelectionBox extends Area2D
 ## .in_selection member, then they'll be notified if they are currently in the
 ## selection.
 
-var current_selection: Array = Array()
+var current_selection: Array = []
 
 var is_selecting: bool = false
 var selection_start: Vector2
@@ -20,6 +20,7 @@ func _ready():
 ## Start using the SelectionBox at the current mouse position.
 func start_selection():
 	is_selecting = true
+	current_selection = []
 	selection_start = get_global_mouse_position()
 	selection_end = selection_start
 	_update_selection()
@@ -56,10 +57,10 @@ func _process(_delta):
 	# This means updating the selection must happen defered.
 	if selection_needs_update > 0:
 		for vertex in current_selection:
-			if "in_selection_box" in vertex:
+			if vertex is Vertex:
 				vertex.in_selection_box = false
 		current_selection = get_overlapping_areas()
 		for vertex in current_selection:
-			if "in_selection_box" in vertex:
+			if vertex is Vertex:
 				vertex.in_selection_box = true
 		selection_needs_update -= 1
