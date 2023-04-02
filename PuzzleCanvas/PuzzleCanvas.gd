@@ -9,7 +9,6 @@ var edge_scene = preload("res://Edge/edge.tscn")
 @onready var selection_box = $SelectionBox
 
 var bbox: Rect2
-var positions = {}
 var edges = []
 
 var current_hover = null
@@ -64,7 +63,8 @@ func _ready():
 	var sharp_bbox = Rect2(Vector2(205, 105), Vector2((w-1) * 150, (h-1) * 150))
 	set_bbox(sharp_bbox)
 	camera.zoom_changed.connect(update_zoom)
-	
+
+	var positions = {}
 	for x in range(0, w):
 		for y in range(0, h):
 			var vertex = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
