@@ -40,12 +40,13 @@ func vertex_input_event(vertex: Vertex, event: InputEvent):
 
 				handle_mouse_release()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			# Rollback the drag.
-			canvas.apply_on_selected_vertices(canvas.drag_vertex_rollback)
-			clear_drag_start()
+			if drag_position != Vector2.INF:
+				# Rollback the drag.
+				canvas.apply_on_selected_vertices(canvas.drag_vertex_rollback)
+				clear_drag_start()
 
-			# Remove the selection box without effect.
-			canvas.selection_box.end_selection()
+				# Remove the selection box without effect.
+				canvas.selection_box.end_selection()
 
 	elif event is InputEventMouseMotion:
 		handle_mouse_motion(event)
