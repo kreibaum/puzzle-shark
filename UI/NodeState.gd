@@ -1,8 +1,8 @@
 class_name NodeState extends State
 
-## This state makes a ghost handle follow the mouse. By clicking you place it
-## and it becomes a real handle. By clicking on a handle you can move it.
-## By right clicking you can delete a handle.
+## This state makes a ghost vertex follow the mouse. By clicking you place it
+## and it becomes a real vertex. By clicking on a vertex you can move it.
+## By right clicking you can delete a vertex.
 
 ## Tracks on which object the mouse started its action
 var vertex_on_which_click_started = null
@@ -25,18 +25,18 @@ func exit_state():
 
 
 ## This code is currently being shared with SelectState.gd via copy-paste.
-func drag_drop_handle_hover_event(handle: DragDropHandle, is_hovering: bool):
+func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 	# If we are already hovering something, we don't want to change that.
-	if canvas.current_hover != null and handle != canvas.current_hover:
+	if canvas.current_hover != null and vertex != canvas.current_hover:
 		return
 
-	handle.hovered = is_hovering
+	vertex.hovered = is_hovering
 
 	# Our state machine should remember what we are currently hovering.
-	if !handle.hovered:
+	if !vertex.hovered:
 		canvas.current_hover = null
 	else:
-		canvas.current_hover = handle
+		canvas.current_hover = vertex
 
 	preview.visible = canvas.current_hover == null
 
@@ -48,10 +48,10 @@ func unhandled_input(event):
 		if canvas.current_hover == null && event.button_index == MOUSE_BUTTON_LEFT:
 			# Create a new vertex at the current position
 			# This vertex is then automatically selected
-			var handle = canvas.create_vertex(canvas.get_global_mouse_position())
-			canvas.current_hover = handle
-			canvas.deselect_all_handles()
-			canvas.select_handle(handle)
+			var vertex = canvas.create_vertex(canvas.get_global_mouse_position())
+			canvas.current_hover = vertex
+			canvas.deselect_all_vertices()
+			canvas.select_vertex(vertex)
 			preview.visible = canvas.current_hover == null
 
 

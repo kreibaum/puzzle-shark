@@ -23,15 +23,15 @@ func exit_state():
 	pass
 
 
-func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
+func vertex_input_event(vertex: Vertex, event: InputEvent):
 	pass
 
 
-func drag_drop_handle_hover_event(handle: DragDropHandle, is_hovering: bool):
+func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 	pass
 
 
-func edge_input_event(handle: Edge, event: InputEvent):
+func edge_input_event(vertex: Edge, event: InputEvent):
 	pass
 
 

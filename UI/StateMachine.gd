@@ -18,16 +18,16 @@ func set_state(new_state: State):
 	current_state.enter_state(canvas, ui_canvas)
 
 
-func drag_drop_handle_input_event(handle: DragDropHandle, event: InputEvent):
-	current_state.drag_drop_handle_input_event(handle, event)
+func vertex_input_event(vertex: Vertex, event: InputEvent):
+	current_state.vertex_input_event(vertex, event)
 
 
-func drag_drop_handle_hover_event(handle: DragDropHandle, is_hovering: bool):
-	current_state.drag_drop_handle_hover_event(handle, is_hovering)
+func vertex_hover_event(vertex: Vertex, is_hovering: bool):
+	current_state.vertex_hover_event(vertex, is_hovering)
 
 
-func edge_input_event(handle: Edge, event: InputEvent):
-	current_state.edge_input_event(handle, event)
+func edge_input_event(vertex: Edge, event: InputEvent):
+	current_state.edge_input_event(vertex, event)
 
 
 func unhandled_input(event: InputEvent):

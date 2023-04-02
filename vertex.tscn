@@ -1,12 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://cn3kxsu5ihpvc"]
+[gd_scene load_steps=3 format=3 uid="uid://fq1n33d6wrki"]
 
-[ext_resource type="Script" path="res://DragDropHandle.gd" id="1_j2he0"]
+[ext_resource type="Script" path="res://Vertex.gd" id="1_xsy2t"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vw7v3"]
 
-[node name="DragDropHandle" type="Area2D"]
+[node name="Vertex" type="Area2D"]
 position = Vector2(400, 200)
-script = ExtResource("1_j2he0")
+script = ExtResource("1_xsy2t")
 
 [node name="Background" type="Polygon2D" parent="."]
 color = Color(0.478431, 0.635294, 0.768627, 1)

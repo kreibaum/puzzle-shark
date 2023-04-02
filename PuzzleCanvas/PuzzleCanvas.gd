@@ -1,6 +1,6 @@
 class_name PuzzleCanvas extends Node2D
 
-var handle_scene = preload("res://drag_drop_handle.tscn")
+var vertex_scene = preload("res://vertex.tscn")
 var edge_scene = preload("res://Edge/edge.tscn")
 
 @export var state_machine: StateMachine
@@ -16,7 +16,7 @@ var current_hover = null
 
 # We can only use a dictionary, there are no dedicated sets.
 # The actual value does not matter.
-## The set of currently selected handles.
+## The set of currently selected vertices.
 var current_selection: Dictionary = Dictionary()
 
 ## Triggered when the selection changes.
@@ -45,15 +45,15 @@ func project_bbox(point: Vector2):
 	return point.clamp(bbox.position, bbox.position + bbox.size)
 
 
-## Enforce all handle constraints. If the handle has the flags
+## Enforce all vertex constraints. If the vertex has the flags
 ## fixed_horizontal or fixed_vertical set to true, their y or x
 ## positions are not changed (unless required by the bbox projection)
-func enforce_constraints(handle : DragDropHandle, point: Vector2):
+func enforce_constraints(vertex: Vertex, point: Vector2):
 	var new_point = Vector2(point)
-	if handle.fixed_horizontal:
-		new_point.y = handle.position.y
-	if handle.fixed_vertical:
-		new_point.x = handle.position.x
+	if vertex.fixed_horizontal:
+		new_point.y = vertex.position.y
+	if vertex.fixed_vertical:
+		new_point.x = vertex.position.x
 	return project_bbox(new_point)
 
 
@@ -67,11 +67,11 @@ func _ready():
 	
 	for x in range(0, w):
 		for y in range(0, h):
-			var handle = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
-			positions[Vector2i(x, y)] = handle
+			var vertex = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
+			positions[Vector2i(x, y)] = vertex
 
-			if x == 0 or x == w - 1: handle.fix_vertical()
-			if y == 0 or y == h - 1: handle.fix_horizontal()
+			if x == 0 or x == w - 1: vertex.fix_vertical()
+			if y == 0 or y == h - 1: vertex.fix_horizontal()
 
 	for x in range(1, w):
 		for y in range(0, h):
@@ -86,40 +86,40 @@ func _ready():
 				edge.make_straight()
 
 ## Creates a new vertex and adds it to the canvas.
-func create_vertex( target_position :Vector2 ) -> DragDropHandle:
-	var handle = handle_scene.instantiate()
-	move_handle_to(handle, target_position)
-	handle.z_index = 2
-	handle.camera = camera
+func create_vertex( target_position :Vector2 ) -> Vertex:
+	var vertex = vertex_scene.instantiate()
+	move_vertex_to(vertex, target_position)
+	vertex.z_index = 2
+	vertex.camera = camera
 
-	# Since all events potentially affect multiple handles, we delegate
+	# Since all events potentially affect multiple vertices, we delegate
 	# the events to the canvas (Self), which can then handle them.
-	handle.captured_input_event.connect(state_machine.drag_drop_handle_input_event)
-	handle.captured_hover_event.connect(state_machine.drag_drop_handle_hover_event)
-	add_child(handle)
-	return handle
+	vertex.captured_input_event.connect(state_machine.vertex_input_event)
+	vertex.captured_hover_event.connect(state_machine.vertex_hover_event)
+	add_child(vertex)
+	return vertex
 
 
-## Creates an edge between the two handles.
-func create_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
+## Creates an edge between the two vertices.
+func create_edge(left: Vertex, right: Vertex) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
 	edge.set_points_before_init($EdgeGenerator.random_line())
 	edge.captured_input_event.connect(state_machine.edge_input_event)
 
 	edges.append(edge)
-	edge.left_handle = left
-	edge.right_handle = right
+	edge.left_vertex = left
+	edge.right_vertex = right
 	edge.camera = camera
 	add_child(edge)
 	selection_changed.emit()
 	return edge
 
-## Returns the edge between the two handles, or null if there is none.
-func find_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
+## Returns the edge between the two vertices, or null if there is none.
+func find_edge(left: Vertex, right: Vertex) -> Edge:
 	for edge in edges:
-		if edge.left_handle == left and edge.right_handle == right:
+		if edge.left_vertex == left and edge.right_vertex == right:
 			return edge
-		elif edge.left_handle == right and edge.right_handle == left:
+		elif edge.left_vertex == right and edge.right_vertex == left:
 			return edge
 	return null
 
@@ -128,7 +128,7 @@ func find_edge(left: DragDropHandle, right: DragDropHandle) -> Edge:
 func get_selected_edges() -> Array:
 	var result = []
 	for edge in edges:
-		if edge.left_handle in current_selection and edge.right_handle in current_selection:
+		if edge.left_vertex in current_selection and edge.right_vertex in current_selection:
 			result.append(edge)
 	return result
 
@@ -138,63 +138,63 @@ func delete_edge(edge: Edge):
 	edge.queue_free()
 	selection_changed.emit()
 
-## Move a handle to a target position. If this position is outside of
-## the bounding box, project the handle onto it. *All* modifications
-## of a handle's position should go through this function.
-func move_handle_to(handle: DragDropHandle, target_position: Vector2):
-	var new_position = enforce_constraints(handle, target_position)
-	if handle.position != new_position:
-		handle.position = new_position
-		handle.position_changed.emit()
+## Move a vertex to a target position. If this position is outside of
+## the bounding box, project the vertex onto it. *All* modifications
+## of a vertex' position should go through this function.
+func move_vertex_to(vertex: Vertex, target_position: Vector2):
+	var new_position = enforce_constraints(vertex, target_position)
+	if vertex.position != new_position:
+		vertex.position = new_position
+		vertex.position_changed.emit()
 
-## Translate a handle by an offset vector, respecting the canvas bounding box
-func move_handle_by(handle: DragDropHandle, delta: Vector2):
-	var target_position = handle.position + delta
-	move_handle_to(handle, target_position)
+## Translate a vertex by an offset vector, respecting the canvas bounding box
+func move_vertex_by(vertex: Vertex, delta: Vector2):
+	var target_position = vertex.position + delta
+	move_vertex_to(vertex, target_position)
 
-## Notify handle that a dragging event starts
-func drag_handle_start(handle: DragDropHandle):
-	handle.store_position(handle.position)
+## Notify vertex that a dragging event starts
+func drag_vertex_start(vertex: Vertex):
+	vertex.store_position(vertex.position)
 
-## Notify handle that a dragging event finished sucessfully
-func drag_handle_end(handle: DragDropHandle):
-	handle.unstore_position()
+## Notify vertex that a dragging event finished sucessfully
+func drag_vertex_end(vertex: Vertex):
+	vertex.unstore_position()
 	
-## Notify handle that a dragging event was aborted
-func drag_handle_rollback(handle: DragDropHandle):
-	move_handle_to(handle, handle.restore_position())
+## Notify vertex that a dragging event was aborted
+func drag_vertex_rollback(vertex: Vertex):
+	move_vertex_to(vertex, vertex.restore_position())
 
-## Removes a handle from the selection set, if it is inside.
-func deselect_handle(handle):
-	current_selection.erase(handle)
-	handle.selected = false
+## Removes a vertex from the selection set, if it is inside.
+func deselect_vertex(vertex):
+	current_selection.erase(vertex)
+	vertex.selected = false
 	selection_changed.emit()
 
 
-## Removes all handles from the selection set.
-func deselect_all_handles():
-	for handle in current_selection:
-		handle.selected = false
+## Removes all vertices from the selection set.
+func deselect_all_vertices():
+	for vertex in current_selection:
+		vertex.selected = false
 	current_selection.clear()
 	selection_changed.emit()
 
 
-## Adds a handle to the selection set.
-func select_handle(handle):
-	current_selection[handle] = true
-	handle.selected = true
+## Adds a vertex to the selection set.
+func select_vertex(vertex):
+	current_selection[vertex] = true
+	vertex.selected = true
 	selection_changed.emit()
 
-## Applies a function to all currently selected handles. (Vertices)
+## Applies a function to all currently selected vertices. (Vertices)
 ## It also applies on the current hover if it is not selected.
-func apply_on_selected_handles(fkt):
-	for any_handle in current_selection:
-		fkt.call(any_handle)
+func apply_on_selected_vertices(fkt):
+	for any_vertex in current_selection:
+		fkt.call(any_vertex)
 	if current_hover != null and current_hover not in current_selection:
 		fkt.call(current_hover)
 
-func move_selected_handles_by(delta: Vector2):
-	apply_on_selected_handles(func(handle): move_handle_by(handle, delta))
+func move_selected_vertices_by(delta: Vector2):
+	apply_on_selected_vertices(func(vertex): move_vertex_by(vertex, delta))
 
 
 

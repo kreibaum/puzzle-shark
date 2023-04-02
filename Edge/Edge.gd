@@ -1,7 +1,7 @@
 class_name Edge extends Node2D
 
-@export var left_handle: DragDropHandle
-@export var right_handle: DragDropHandle
+@export var left_vertex: Vertex
+@export var right_vertex: Vertex
 
 @export var camera: Camera2D
 
@@ -45,8 +45,8 @@ func make_straight():
 # members of the scene tree yet.
 func _ready():
 	self.original_points = self.points.duplicate()
-	left_handle.position_changed.connect(query_update_position)
-	right_handle.position_changed.connect(query_update_position)
+	left_vertex.position_changed.connect(query_update_position)
+	right_vertex.position_changed.connect(query_update_position)
 	smooth_and_update()
 
 
@@ -67,11 +67,11 @@ func query_update_position():
 
 
 # Called to set up the edge in the correct position and then again whenever one
-# of the handles moves.
+# of the vertices moves.
 func update_position():
 	var transformation = build_transformation_matrix()
 	# Check if the transformation is valid. It is invalid if the left and
-	# right handles are too close together in canvas-space. In this case,
+	# right vertices are too close together in canvas-space. In this case,
 	# setting the transformation would lead to a c++ error down the line.
 	if transformation:
 		if $EdgeCollisionArea.is_disabled():
@@ -83,29 +83,30 @@ func update_position():
 		$EdgeCollisionArea.disable()
 
 
-# Update the collision area of the edge
+## Update the collision area of the edge
 func update_carea(force = false):
-	var target_baseline = right_handle.position - left_handle.position
+	var target_baseline = right_vertex.position - left_vertex.position
 	if force or target_baseline.distance_to(self.baseline) > 0.1:
 		self.baseline = target_baseline
 		$EdgeCollisionArea.recalculate(self.points, 9 / self.scale.x)
 
 
-# Construct the transformation matrix that maps the node polyline to its handles
+## Construct the transformation matrix that maps the node polyline to its vertices
 func build_transformation_matrix():
 	var left: Vector2 = self.points[0]
 	var right: Vector2 = self.points[-1]
 
 	return FixedPointTransform2D.build_transformation_matrix(
-		left, right, left_handle.position, right_handle.position
+		left, right, left_vertex.position, right_vertex.position
 	)
 
 
-# Return absolute point coordinates of the edge
+## Return absolute point coordinates of the edge
 func get_shape_points() -> PackedVector2Array:
 	return self.transform * self.points
 
-# Set the color of the edge
+
+## Set the color of the edge
 func set_color(col: Color):
 	if self.color != col:
 		self.color = col

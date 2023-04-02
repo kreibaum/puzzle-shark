@@ -1,9 +1,10 @@
-class_name DragDropHandle extends Area2D
+class_name Vertex extends Area2D
 
 var stored_position: Vector2 = Vector2.INF
 
 var fixed_horizontal: bool = false
 var fixed_vertical: bool = false
+
 
 func set_inset():
 	var points = PackedVector2Array()
@@ -37,32 +38,40 @@ func set_inset():
 		points.append(Vector2(-6, 2))
 	$Inset.set_polygon(points)
 
+
 func fix_horizontal():
 	fixed_horizontal = true
 	set_inset()
+
 
 func unfix_horizontal():
 	fixed_horizontal = false
 	set_inset()
 
+
 func fix_vertical():
 	fixed_vertical = true
 	set_inset()
+
 
 func unfix_vertical():
 	fixed_vertical = false
 	set_inset()
 
+
 func store_position(position_to_store: Vector2):
 	stored_position = position_to_store
 
+
 func unstore_position():
 	stored_position = Vector2.INF
+
 
 func restore_position():
 	var position_to_restore = stored_position
 	unstore_position()
 	return position_to_restore
+
 
 var hovered: bool = false:
 	set(value):
@@ -84,23 +93,27 @@ var in_selection_box: bool = false:
 ## Signal to notify edges that they need to update their position.
 signal position_changed
 
-signal captured_input_event(DragDropHandle, InputEvent)
-signal captured_hover_event(DragDropHandle, bool)
+signal captured_input_event(Vertex, InputEvent)
+signal captured_hover_event(Vertex, bool)
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	camera.zoom_changed.connect(update_zoom)
 
+
 # Called when the mouse is pressed
 func _input_event(_viewport, event, _shape_index):
 	captured_input_event.emit(self, event)
 
+
 func _mouse_enter():
 	captured_hover_event.emit(self, true)
 
+
 func _mouse_exit():
 	captured_hover_event.emit(self, false)
+
 
 func update_color():
 	if selected:
@@ -116,6 +129,6 @@ func update_color():
 		$Inset.color = "3d3d3d"
 		$Outline.default_color = "3d3d3d"
 
+
 func update_zoom(zoom):
 	self.scale = Vector2(1 / zoom.x, 1 / zoom.y)
-

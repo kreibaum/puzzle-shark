@@ -15,5 +15,5 @@ func _on_Button_pressed():
 	# Randomization essentially just deletes a line and creates a new one.
 	var selected_edges = canvas.get_selected_edges()
 	for edge in selected_edges:
-		canvas.create_edge(edge.left_handle, edge.right_handle)
+		canvas.create_edge(edge.left_vertex, edge.right_vertex)
 		canvas.delete_edge(edge)

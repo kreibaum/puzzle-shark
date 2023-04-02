@@ -4,10 +4,8 @@
 [ext_resource type="Script" path="res://Edge/CatmulRomSpline.gd" id="2_2wmnf"]
 [ext_resource type="Script" path="res://Edge/EdgeCollisionArea.gd" id="3_8ekfx"]
 
-[node name="Edge" type="Node2D" node_paths=PackedStringArray("left_handle", "right_handle")]
+[node name="Edge" type="Node2D"]
 script = ExtResource("1_m0crv")
-left_handle = NodePath("")
-right_handle = NodePath("")
 
 [node name="CatmulRomSpline" type="Line2D" parent="."]
 visible = false
