@@ -145,6 +145,8 @@ func delete_vertex(vertex: Vertex):
 		if edge.is_connected_to(vertex):
 			edge.queue_free()
 			edges.remove_at(index)
+	if vertex == current_hover:
+		current_hover = null
 	deselect_vertex(vertex)
 	vertex.queue_free()
 			

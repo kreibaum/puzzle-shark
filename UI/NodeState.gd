@@ -55,7 +55,11 @@ func unhandled_input(event):
 			preview.visible = canvas.current_hover == null
 		elif canvas.current_hover != null && event.button_index == MOUSE_BUTTON_RIGHT:
 			canvas.delete_vertex(canvas.current_hover)
-			canvas.current_hover = null
+	# Delete all selected vertices
+	if Input.is_action_just_pressed("Delete"):
+		var keys = canvas.current_selection.keys()
+		for vertex in keys:
+			canvas.delete_vertex(vertex)
 
 
 

@@ -156,3 +156,9 @@ func unhandled_input(event):
 		print("Saving to file...")
 		print(OS.get_user_data_dir())
 		canvas.saveToFile()
+
+	# Delete all selected vertices
+	if Input.is_action_just_pressed("Delete"):
+		var keys = canvas.current_selection.keys()
+		for vertex in keys:
+			canvas.delete_vertex(vertex)
