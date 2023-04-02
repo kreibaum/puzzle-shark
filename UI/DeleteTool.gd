@@ -6,6 +6,7 @@ class_name DeleteTool extends State
 
 ## Tracks on which object the mouse started its action
 var vertex_on_which_click_started = null
+var edge_on_which_click_started = null
 
 
 ## This code is currently being shared with SelectState.gd via copy-paste.
@@ -21,6 +22,16 @@ func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 		canvas.current_hover = null
 	else:
 		canvas.current_hover = vertex
+
+
+func edge_input_event(edge: Edge, event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				edge_on_which_click_started = edge
+			elif edge_on_which_click_started == edge:
+				canvas.delete_edge(edge)
+				edge_on_which_click_started = null
 
 
 func unhandled_input(event):

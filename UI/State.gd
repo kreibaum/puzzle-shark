@@ -31,7 +31,7 @@ func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 	pass
 
 
-func edge_input_event(vertex: Edge, event: InputEvent):
+func edge_input_event(edge: Edge, event: InputEvent):
 	pass
 
 

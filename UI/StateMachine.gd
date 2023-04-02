@@ -26,8 +26,8 @@ func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 	current_state.vertex_hover_event(vertex, is_hovering)
 
 
-func edge_input_event(vertex: Edge, event: InputEvent):
-	current_state.edge_input_event(vertex, event)
+func edge_input_event(edge: Edge, event: InputEvent):
+	current_state.edge_input_event(edge, event)
 
 
 func unhandled_input(event: InputEvent):
