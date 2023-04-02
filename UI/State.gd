@@ -37,3 +37,7 @@ func edge_input_event(vertex: Edge, event: InputEvent):
 
 func unhandled_input(event: InputEvent):
 	pass
+
+
+func input(event: InputEvent):
+	pass

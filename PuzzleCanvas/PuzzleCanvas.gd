@@ -237,3 +237,6 @@ func edge_path(edge: Edge) -> String:
 ## Pass along unhandled input to the state machine
 func _unhandled_input(event):
 	state_machine.unhandled_input(event)
+
+func _input(event):
+	state_machine.input(event)

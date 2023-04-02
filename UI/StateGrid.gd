@@ -21,7 +21,7 @@ func state_definitions():
 	return [
 		["Select", KEY_X, func(): return SelectState.new()],
 		["Node", KEY_V, func(): return NodeState.new()],
-		["Edge", KEY_U, func(): return SelectState.new()],
+		["Edge", KEY_U, func(): return EdgeState.new()],
 		["Sculpt", KEY_I, func(): return SelectState.new()]
 	]
 
