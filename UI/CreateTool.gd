@@ -8,6 +8,7 @@ var last_vertex = null
 
 var preview_edge
 var preview_vertex
+var hover_sticker
 
 
 ## On entering this state, we create a virtual vertex that follows the mouse.
@@ -60,7 +61,7 @@ func focused_vertex() -> Vertex:
 
 func input(event: InputEvent):
 	if event is InputEventMouseMotion:
-		canvas.move_vertex_to(preview_vertex, canvas.get_global_mouse_position())
+		canvas.move_vertex_to(preview_vertex, get_sticky_mouse_position())
 
 	# This is how you consume an event and prevent it from being passed to other nodes
 	# ui_canvas.get_viewport().set_input_as_handled()
@@ -69,7 +70,11 @@ func input(event: InputEvent):
 			# Case 1: We clicked the virtual vertex and are not currently drawing a chain.
 			# In this case the chain starts with a new vertex.
 			if last_vertex == null && canvas.current_hover == null:
-				set_last_vertex(canvas.create_vertex(canvas.get_global_mouse_position()))
+				set_last_vertex(canvas.create_vertex(get_sticky_mouse_position()))
+				# TODO: Since the sticky mouse position is not necessarily on
+				# the vertex, just calling the vertex hover event may bring us
+				# into an inconsisten state where we are not actually hovering
+				# the vertex but still consider it hovered.
 				vertex_hover_event(last_vertex, true)
 
 			# Case 2: We clicked an actual vertex and are not currently drawing a chain.
@@ -80,7 +85,7 @@ func input(event: InputEvent):
 			# Case 3: We clicked the virtual vertex and are currently drawing a chain.
 			elif last_vertex != null && canvas.current_hover == null:
 				var last_last_vertex = last_vertex
-				set_last_vertex(canvas.create_vertex(canvas.get_global_mouse_position()))
+				set_last_vertex(canvas.create_vertex(get_sticky_mouse_position()))
 				vertex_hover_event(last_vertex, true)
 				canvas.create_edge(last_last_vertex, last_vertex)
 
@@ -93,3 +98,20 @@ func input(event: InputEvent):
 		# If we right-click, we cancel the chain.
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			set_last_vertex(null)
+
+
+func get_sticky_mouse_position() -> Vector2:
+	var mouse_position = canvas.get_global_mouse_position()
+	if hover_sticker == null:
+		return mouse_position
+	else:
+		return hover_sticker.find_nearest_sticky_point(mouse_position)
+
+
+## Track which sticker we are hovering.
+## If we are over a sticker we want to snap the preview vertex to it.
+func sticker_hover_event(sticker: Sticker, is_hovering: bool):
+	if is_hovering:
+		hover_sticker = sticker
+	else:
+		hover_sticker = null

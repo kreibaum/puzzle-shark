@@ -41,11 +41,11 @@ func edge_input_event(edge: Edge, event: InputEvent):
 	pass
 
 
-func sticker_input_event(vertex: Sticker, event: InputEvent):
+func sticker_input_event(sticker: Sticker, event: InputEvent):
 	pass
 
 
-func sticker_hover_event(vertex: Sticker, is_hovering: bool):
+func sticker_hover_event(sticker: Sticker, is_hovering: bool):
 	pass
 
 
