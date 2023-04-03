@@ -10,6 +10,7 @@ var edge_scene = preload("res://Edge/edge.tscn")
 
 var bbox: Rect2
 var edges = []
+var stickers = []
 
 var current_hover = null
 
@@ -212,6 +213,9 @@ func move_selected_vertices_by(delta: Vector2):
 	apply_on_selected_vertices(func(vertex): move_vertex_by(vertex, delta))
 
 
+func add_sticker(sticker: Sticker):
+	stickers.append(sticker)
+	add_child(sticker)
 
 
 func saveToFile():
@@ -242,3 +246,5 @@ func _unhandled_input(event):
 
 func _input(event):
 	state_machine.input(event)
+
+

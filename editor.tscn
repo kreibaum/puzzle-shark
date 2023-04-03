@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://61gu0hssk52h"]
+[gd_scene load_steps=11 format=3 uid="uid://61gu0hssk52h"]
 
 [ext_resource type="Script" path="res://UI/PanCamera.gd" id="1_bwty5"]
 [ext_resource type="PackedScene" uid="uid://cqq8meapgi251" path="res://PuzzleCanvas/puzzle_canvas.tscn" id="2_hetub"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://UI/EdgeInspector.gd" id="7_ydjap"]
 [ext_resource type="Script" path="res://UI/StateMachine.gd" id="8_ac1sk"]
 [ext_resource type="Script" path="res://UI/StateGrid.gd" id="8_qgcry"]
+[ext_resource type="Script" path="res://Sticker/StickerParser.gd" id="10_dkdjr"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -121,3 +122,7 @@ state_machine = NodePath("../../StateMachine")
 script = ExtResource("8_ac1sk")
 canvas = NodePath("../PuzzleCanvas")
 ui_canvas = NodePath("../CanvasLayer")
+
+[node name="StickerParser" type="Node" parent="." node_paths=PackedStringArray("canvas")]
+script = ExtResource("10_dkdjr")
+canvas = NodePath("../PuzzleCanvas")
