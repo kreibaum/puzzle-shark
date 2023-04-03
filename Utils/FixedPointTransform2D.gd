@@ -32,3 +32,10 @@ static func build_transformation_matrix(sLeft: Vector2, sRight: Vector2, tLeft: 
 static func build_scale_matrix(scale: float, center: Vector2):
 	var zero_out = Transform2D(0, Vector2.ONE, 0, -center)
 	return Transform2D(0, Vector2(scale, scale), 0, center) * zero_out
+
+
+## Builds a transformation matrix that rotates by "angle" and keeps a point
+## "center" fixed.
+static func build_rotation_matrix(angle: float, center: Vector2):
+	var zero_out = Transform2D(0, Vector2.ONE, 0, -center)
+	return Transform2D(angle, Vector2.ONE, 0, center) * zero_out

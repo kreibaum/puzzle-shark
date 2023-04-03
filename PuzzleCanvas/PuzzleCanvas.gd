@@ -231,6 +231,10 @@ func zoom_sticker(sticker: Sticker, zoom: float):
 	var additional_transform = FixedPointTransform2D.build_scale_matrix(zoom, get_global_mouse_position())
 	sticker.transform = additional_transform * sticker.transform
 
+func rotate_sticker(sticker: Sticker, sticker_rotation: float):
+	var additional_transform = FixedPointTransform2D.build_rotation_matrix(sticker_rotation, get_global_mouse_position())
+	sticker.transform = additional_transform * sticker.transform
+
 ## Delets a sticker. Any Vertices that are currently attached to the sticker
 ## will be detached and kept in the puzzle.
 func delete_sticker(sticker: Sticker):

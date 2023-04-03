@@ -29,10 +29,16 @@ func handle_event_ignoring_source(event: InputEvent):
 			last_mouse_position = new_position
 			set_input_as_handled()
 	if event.is_action_pressed("ZoomIn") && sticker_in_hand != null:
-		canvas.zoom_sticker(sticker_in_hand, 1.0 / 1.1)
+		if Input.is_key_pressed(KEY_CTRL):
+			canvas.rotate_sticker(sticker_in_hand, -10.0 * PI / 180.0)
+		else:
+			canvas.zoom_sticker(sticker_in_hand, 1.0 / 1.1)
 		set_input_as_handled()
 	elif event.is_action_pressed("ZoomOut") && sticker_in_hand != null:
-		canvas.zoom_sticker(sticker_in_hand, 1.1)
+		if Input.is_key_pressed(KEY_CTRL):
+			canvas.rotate_sticker(sticker_in_hand, 10.0 * PI / 180.0)
+		else:
+			canvas.zoom_sticker(sticker_in_hand, 1.1)
 		set_input_as_handled()
 
 
