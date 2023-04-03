@@ -86,7 +86,8 @@ func handle_mouse_release():
 			canvas.deselect_all_vertices()
 
 		for vertex in canvas.selection_box.current_selection:
-			canvas.select_vertex(vertex)
+			if vertex is Vertex:
+				canvas.select_vertex(vertex)
 
 		canvas.selection_box.end_selection()
 

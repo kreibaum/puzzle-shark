@@ -21,7 +21,8 @@ func state_definitions():
 	return [
 		["Select", KEY_X, func(): return SelectTool.new()],
 		["Delete", KEY_V, func(): return DeleteTool.new()],
-		["Create", KEY_U, func(): return CreateTool.new()],
+		["Create", KEY_L, func(): return CreateTool.new()],
+		["Sticker", KEY_U, func(): return StickerTool.new()],
 		["Sculpt", KEY_I, func(): return SelectTool.new()]
 	]
 

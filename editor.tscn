@@ -102,12 +102,12 @@ text = ">"
 [node name="StateGrid" type="ItemList" parent="CanvasLayer" node_paths=PackedStringArray("state_machine")]
 offset_left = 13.0
 offset_top = 12.0
-offset_right = 177.0
+offset_right = 204.0
 offset_bottom = 101.0
 max_text_lines = 2
 text_overrun_behavior = 0
 item_count = 5
-max_columns = 2
+max_columns = 3
 same_column_width = true
 fixed_column_width = 50
 item_0/text = "Select"
@@ -123,6 +123,7 @@ script = ExtResource("8_ac1sk")
 canvas = NodePath("../PuzzleCanvas")
 ui_canvas = NodePath("../CanvasLayer")
 
-[node name="StickerParser" type="Node" parent="." node_paths=PackedStringArray("canvas")]
+[node name="StickerParser" type="Node" parent="." node_paths=PackedStringArray("canvas", "state_machine")]
 script = ExtResource("10_dkdjr")
 canvas = NodePath("../PuzzleCanvas")
+state_machine = NodePath("../StateMachine")

@@ -2,5 +2,8 @@
 
 [ext_resource type="Script" path="res://Sticker/Sticker.gd" id="1_bcm48"]
 
-[node name="sticker" type="Node2D"]
+[node name="Sticker" type="Area2D"]
+collision_layer = 8
+collision_mask = 8
+monitorable = false
 script = ExtResource("1_bcm48")

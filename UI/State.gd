@@ -23,6 +23,12 @@ func exit_state():
 	pass
 
 
+## Prevents the event from being passed to other parts of the application.
+## This also means it won't come in again as an unhandled_input event.
+func set_input_as_handled():
+	ui_canvas.get_viewport().set_input_as_handled()
+
+
 func vertex_input_event(vertex: Vertex, event: InputEvent):
 	pass
 
@@ -32,6 +38,14 @@ func vertex_hover_event(vertex: Vertex, is_hovering: bool):
 
 
 func edge_input_event(edge: Edge, event: InputEvent):
+	pass
+
+
+func sticker_input_event(vertex: Sticker, event: InputEvent):
+	pass
+
+
+func sticker_hover_event(vertex: Sticker, is_hovering: bool):
 	pass
 
 
