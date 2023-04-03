@@ -225,6 +225,12 @@ func move_sticker_to(sticker: Sticker, target_position: Vector2):
 func move_sticker_by(sticker: Sticker, delta: Vector2):
 	sticker.transform = sticker.transform.translated(delta)
 
+## Delets a sticker. Any Vertices that are currently attached to the sticker
+## will be detached and kept in the puzzle.
+func delete_sticker(sticker: Sticker):
+	stickers.erase(sticker)
+	sticker.queue_free()
+
 func saveToFile():
 	var file = FileAccess.open("user://jigsaw.svg", FileAccess.WRITE)
 	file.store_string("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")

@@ -7,6 +7,7 @@ class_name DeleteTool extends State
 ## Tracks on which object the mouse started its action
 var vertex_on_which_click_started = null
 var edge_on_which_click_started = null
+var sticker_on_which_click_started = null
 
 
 ## This code is currently being shared with SelectState.gd via copy-paste.
@@ -32,6 +33,16 @@ func edge_input_event(edge: Edge, event: InputEvent):
 			elif edge_on_which_click_started == edge:
 				canvas.delete_edge(edge)
 				edge_on_which_click_started = null
+
+
+func sticker_input_event(sticker: Sticker, event: InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				sticker_on_which_click_started = sticker
+			elif sticker_on_which_click_started == sticker:
+				canvas.delete_sticker(sticker)
+				sticker_on_which_click_started = null
 
 
 func unhandled_input(event):

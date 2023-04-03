@@ -3,7 +3,7 @@ class_name StickerTool extends State
 ## This Tool allows you to move around stickers and to attach vertices to
 ## stickers.
 ##
-## - [ ] Add a way to select a sticker and move it around.
+## - [x] Add a way to select a sticker and move it around.
 ## - [ ] Make it possible to snap a vertex to a sticker.
 ## - [ ] Make the vertex actually stick to the sticker.
 
