@@ -225,6 +225,12 @@ func move_sticker_to(sticker: Sticker, target_position: Vector2):
 func move_sticker_by(sticker: Sticker, delta: Vector2):
 	sticker.transform = sticker.transform.translated(delta)
 
+## Change the sticker size by a factor of zoom while keeping the global
+## mouse position pinned.
+func zoom_sticker(sticker: Sticker, zoom: float):
+	var additional_transform = FixedPointTransform2D.build_scale_matrix(zoom, get_global_mouse_position())
+	sticker.transform = additional_transform * sticker.transform
+
 ## Delets a sticker. Any Vertices that are currently attached to the sticker
 ## will be detached and kept in the puzzle.
 func delete_sticker(sticker: Sticker):

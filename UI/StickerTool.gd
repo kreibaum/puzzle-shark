@@ -28,6 +28,12 @@ func handle_event_ignoring_source(event: InputEvent):
 				canvas.move_sticker_by(sticker_in_hand, delta)
 			last_mouse_position = new_position
 			set_input_as_handled()
+	if event.is_action_pressed("ZoomIn") && sticker_in_hand != null:
+		canvas.zoom_sticker(sticker_in_hand, 1.0 / 1.1)
+		set_input_as_handled()
+	elif event.is_action_pressed("ZoomOut") && sticker_in_hand != null:
+		canvas.zoom_sticker(sticker_in_hand, 1.1)
+		set_input_as_handled()
 
 
 func sticker_input_event(sticker: Sticker, event: InputEvent):

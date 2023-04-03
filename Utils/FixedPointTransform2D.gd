@@ -6,9 +6,7 @@ class_name FixedPointTransform2D extends Object
 
 
 ## Build a transformation matrix that maps the source points to the target points.
-static func build_transformation_matrix(
-	sLeft: Vector2, sRight: Vector2, tLeft: Vector2, tRight: Vector2
-):
+static func build_transformation_matrix(sLeft: Vector2, sRight: Vector2, tLeft: Vector2, tRight: Vector2):
 	var baseline = sRight - sLeft
 	var shape_length = baseline.length()
 	var shape_angle = baseline.angle()
@@ -19,10 +17,18 @@ static func build_transformation_matrix(
 
 	# If the target length is too small, this code results in a c++ exception
 	# further down in the code. Better avoid this
-	if target_length < 1: return
+	if target_length < 1:
+		return
 
 	var scale_vector = Vector2(target_length / shape_length, target_length / shape_length)
 
 	# It is important that we first move
 	var zero_out = Transform2D(0, Vector2.ONE, 0, -sLeft)
 	return Transform2D(target_angle - shape_angle, scale_vector, 0, tLeft) * zero_out
+
+
+## Build a transformation matrix that scales by a factor of "scale" and
+## keeps a point "center" fixed.
+static func build_scale_matrix(scale: float, center: Vector2):
+	var zero_out = Transform2D(0, Vector2.ONE, 0, -center)
+	return Transform2D(0, Vector2(scale, scale), 0, center) * zero_out
