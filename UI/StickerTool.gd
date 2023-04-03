@@ -25,7 +25,7 @@ func handle_event_ignoring_source(event: InputEvent):
 			var new_position = canvas.get_global_mouse_position()
 			if last_mouse_position != Vector2.INF:
 				var delta = new_position - last_mouse_position
-				sticker_in_hand.position += delta
+				canvas.move_sticker_by(sticker_in_hand, delta)
 			last_mouse_position = new_position
 			set_input_as_handled()
 

@@ -18,7 +18,6 @@ class_name StickerParser extends Node
 ## This also listens for files getting dropped into the program to open them.
 
 @export var canvas: PuzzleCanvas
-@export var state_machine: StateMachine
 
 
 func _ready():
@@ -26,13 +25,14 @@ func _ready():
 
 
 func _on_files_dropped(files):
+	var drop_origin = canvas.get_global_mouse_position()
+
 	for filename in files:
 		if filename.ends_with(".json"):
 			var sticker = load_sticker(filename)
 			if sticker != null:
 				canvas.add_sticker(sticker)
-				sticker.captured_input_event.connect(state_machine.sticker_input_event)
-				sticker.captured_hover_event.connect(state_machine.sticker_hover_event)
+				canvas.move_sticker_to(sticker, drop_origin)
 
 
 ## Open the file and parse it as a json file.

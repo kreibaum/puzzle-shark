@@ -216,7 +216,14 @@ func move_selected_vertices_by(delta: Vector2):
 func add_sticker(sticker: Sticker):
 	stickers.append(sticker)
 	add_child(sticker)
+	sticker.captured_input_event.connect(state_machine.sticker_input_event)
+	sticker.captured_hover_event.connect(state_machine.sticker_hover_event)
 
+func move_sticker_to(sticker: Sticker, target_position: Vector2):
+	sticker.transform = Transform2D(0, target_position)
+
+func move_sticker_by(sticker: Sticker, delta: Vector2):
+	sticker.transform = sticker.transform.translated(delta)
 
 func saveToFile():
 	var file = FileAccess.open("user://jigsaw.svg", FileAccess.WRITE)

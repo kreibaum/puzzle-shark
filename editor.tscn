@@ -123,7 +123,6 @@ script = ExtResource("8_ac1sk")
 canvas = NodePath("../PuzzleCanvas")
 ui_canvas = NodePath("../CanvasLayer")
 
-[node name="StickerParser" type="Node" parent="." node_paths=PackedStringArray("canvas", "state_machine")]
+[node name="StickerParser" type="Node" parent="." node_paths=PackedStringArray("canvas")]
 script = ExtResource("10_dkdjr")
 canvas = NodePath("../PuzzleCanvas")
-state_machine = NodePath("../StateMachine")
