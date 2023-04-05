@@ -49,47 +49,98 @@ func load_sticker(filename: String) -> Sticker:
 	print("Loaded sticker: ", data["name"])
 	var sticker = Sticker.new()
 	for line in data["lines"]:
-		sticker.add_polyline(parse_line(line), line["sticky"])
+		for parsed_line in parse_line(line):
+			print(parsed_line[0], parsed_line[-1])
+			sticker.add_polyline(parsed_line, line["sticky"])
 
 	return sticker
 
 
 ## Parses a line with a "d" attribute.
-## Right now we only support a reduced set of svg path commands.
-## We support a "m" at the start of the path which is followed by a series of
-## implicit "l" commands. We also support a "z" at the end of the path.
+## Right now we only support a reduced set of svg path commands wih produce
+## straight lines. Those are "m", "M", "l", "L", "v", "V", "h", "H". We also
+## support "z" which closes the path.
 ##
 ## Please refer to
 ## https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#path_commands
 ## for more information on the commands.
-##
-## - "m" is a relative move to command. Any subsequent coordinate pair(s) are
-##   interpretes as parameters for implicit relative LineTo (l) commands.
-## - "z" closes the path.
 func parse_line(line):
 	var d = line["d"]
+
 	var pen_position = Vector2.ZERO
+	var mode = null
 
 	var tokens = d.split(" ")
-	if tokens[0] != "m":
-		print("Error: First command must be 'm'")
-		return
 
-	var polyline = []
+	var all_lines = []
+	var current_line = null
 
-	var index = 1
-	while index < tokens.size():
-		var token = tokens[index]
-		if token == "z":
-			polyline.append(polyline[0])
-			break
-		var shift = parse_vector2(token)
-		pen_position += shift
-		polyline.append(pen_position)
+	for token in tokens:
+		# If the token is a mode switch token, then we switch modes and don't
+		# move the pen at all. The supported tokens are:
+		# - "m" for move to
+		# - "M" for absolute move to
+		# - "l" for line to
+		# - "L" for absolute line to
+		# - "v" for vertical line to
+		# - "V" for absolute vertical line to
+		# - "h" for horizontal line to
+		# - "H" for absolute horizontal line to
+		# As well as some non-consuming tokens:
+		# - "z" for close path
+		if "mMlLvVhH".contains(token):
+			mode = token
+			continue
+		if "zZ".contains(token):
+			mode = null
+			pen_position = current_line[0]
+			current_line.append(pen_position)
+			# Commit current line and start a new one.
+			all_lines.append(current_line)
+			#current_line = [pen_position]
+			current_line = null
+			continue
+		if mode == "m":
+			# Commit current line and start a new one.
+			if current_line != null:
+				all_lines.append(current_line)
+			pen_position += parse_vector2(token)
+			current_line = [pen_position]
+			mode = "l"
+		elif mode == "M":
+			# Commit current line and start a new one.
+			if current_line != null:
+				all_lines.append(current_line)
+			pen_position = parse_vector2(token)
+			current_line = [pen_position]
+			mode = "L"
+		elif mode == "l":
+			pen_position += parse_vector2(token)
+			current_line.append(pen_position)
+		elif mode == "L":
+			pen_position = parse_vector2(token)
+			current_line.append(pen_position)
+		elif mode == "v":
+			pen_position.y += float(token)
+			current_line.append(pen_position)
+		elif mode == "V":
+			pen_position.y = float(token)
+			current_line.append(pen_position)
+		elif mode == "h":
+			pen_position.x += float(token)
+			current_line.append(pen_position)
+		elif mode == "H":
+			pen_position.x = float(token)
+			current_line.append(pen_position)
+		else:
+			print("Error: Unknown mode: ", mode)
+			return
 
-		index += 1
+	# Commit current line and start a new one.
+	if current_line != null:
+		all_lines.append(current_line)
 
-	return polyline
+	return all_lines
 
 
 func parse_vector2(token: String):
