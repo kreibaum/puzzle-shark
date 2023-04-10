@@ -372,15 +372,24 @@ func saveToFile():
 		# Svg path format: M x1 y1 L x2 y2 L x3 y3 ...
 		file.store_string("<path d=\"" + edge_path(edge) + "\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>\n")
 
+	for sticker in stickers:
+		print("Sticker: " + str(sticker))
+		for line in sticker.lines:
+			print("Line: " + str(line))
+			file.store_string("<path d=\"" + array2d_path(sticker.transform * line.points) + "\" stroke=\"black\" stroke-width=\"2\" fill=\"none\"/>\n")
+
 	file.store_string("</svg>")
 
 	file.close()
 
 func edge_path(edge: Edge) -> String:
-	var svg_path = "M "
-	for point in edge.get_shape_points():
-		svg_path += str(point.x) + " " + str(point.y) + " L "
-	svg_path = svg_path.trim_suffix(" L ")
+	return array2d_path(edge.get_shape_points())
+
+func array2d_path(array: Array) -> String:
+	var svg_path = "M"
+	# M is implicitly followed by L. So we don't have to include any L commands.
+	for point in array:
+		svg_path += " " + str(point.x) + " " + str(point.y) 
 
 	return svg_path
 
