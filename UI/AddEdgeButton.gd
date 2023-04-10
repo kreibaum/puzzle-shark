@@ -9,10 +9,10 @@ func _ready():
 
 
 func _on_Button_pressed():
-	# Check if exactly two points are selected in the canvas.current_selection
+	# Check if exactly two points are selected in the canvas.selected_vertices
 	# dictionary. If so, add a line between them.
 
-	var selection: Dictionary = canvas.current_selection
+	var selection: Dictionary = canvas.selected_vertices
 	if selection.size() == 2 and canvas.get_selected_edges().size() == 0:
 		var points: Array = selection.keys()
 		canvas.create_edge(points[0], points[1])

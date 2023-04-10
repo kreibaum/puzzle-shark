@@ -5,6 +5,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vw7v3"]
 
 [node name="Vertex" type="Area2D"]
+z_index = 3
 position = Vector2(400, 200)
 script = ExtResource("1_xsy2t")
 

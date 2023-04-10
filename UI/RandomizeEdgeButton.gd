@@ -9,7 +9,7 @@ func _ready():
 
 
 func _on_Button_pressed():
-	# Check if exactly two points are selected in the canvas.current_selection
+	# Check if exactly two points are selected in the canvas.selected_vertices
 	# dictionary. If so, randomize the line between those two points.
 
 	# Randomization essentially just deletes a line and creates a new one.

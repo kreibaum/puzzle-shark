@@ -1,147 +1,172 @@
-class_name Vertex extends Area2D
+class_name Vertex extends PuzzleObject
 
+# Store the current position in order to be able to undo drag events
 var stored_position: Vector2 = Vector2.INF
 
-var fixed_horizontal: bool = false
-var fixed_vertical: bool = false
-
-enum SUBSTANCE {
-	VIRTUAL,
-	ACTUAL,
+## Anchor options of a vertex
+enum ANCHOR {
+	FREE = 0,
+	VERTICAL = 1,
+	HORIZONTAL = 2,
+	CANVAS = 3,
+	STICKER = 4,
 }
 
-var substance: SUBSTANCE = SUBSTANCE.ACTUAL
+var anchor: ANCHOR
+var anchor_sticker: Sticker
+var anchor_sticker_inv_transform: Transform2D
+
+func inset_shape_free():
+	var points = PackedVector2Array()
+	for index in range(0,16):
+		var angle = index * PI / 8
+		var point = 4 * Vector2(cos(angle), sin(angle))
+		points.append(point)
+	return points
+
+func inset_shape_vertical():
+	var points = PackedVector2Array()
+	points.append(Vector2(-2, -6))
+	points.append(Vector2(2, -6))
+	points.append(Vector2(2, 6))
+	points.append(Vector2(-2, 6))
+	return points
+
+func inset_shape_horizontal():
+	var points = PackedVector2Array()
+	points.append(Vector2(-6, -2))
+	points.append(Vector2(6, -2))
+	points.append(Vector2(6, 2))
+	points.append(Vector2(-6, 2))
+	return points
+
+func inset_shape_canvas():
+	var points = PackedVector2Array()
+	points.append(Vector2(-6, -2))
+	points.append(Vector2(-2, -2))
+	points.append(Vector2(-2, -6))
+	points.append(Vector2(2, -6))
+	points.append(Vector2(2, -2))
+	points.append(Vector2(6, -2))
+	points.append(Vector2(6, 2))
+	points.append(Vector2(2, 2))
+	points.append(Vector2(2, 6))
+	points.append(Vector2(-2, 6))
+	points.append(Vector2(-2, 2))
+	points.append(Vector2(-6, 2))
+	return points
+
+func inset_shape_sticker():
+	var points = PackedVector2Array()
+	points.append(Vector2(-4, -4))
+	points.append(Vector2(4, -4))
+	points.append(Vector2(4, 4))
+	points.append(Vector2(-4, 4))
+	return points
 
 
-## Sets the "substance" of the vertex. This is how "Real" the vertex is.
-## Basically a more readable version of an is_virtual boolean.
-func set_substance(new_substance: SUBSTANCE):
-	substance = new_substance
-	if substance == SUBSTANCE.VIRTUAL:
+## Update the visual indicator (the inset) that displays the current vertex
+## anchoring
+func set_inset_shape(given_anchor: ANCHOR):
+	var points
+	if given_anchor == ANCHOR.FREE:
+		points = inset_shape_free()
+	elif given_anchor == ANCHOR.VERTICAL:
+		points = inset_shape_vertical()
+	elif given_anchor == ANCHOR.HORIZONTAL:
+		points = inset_shape_horizontal()
+	elif given_anchor == ANCHOR.CANVAS:
+		points = inset_shape_canvas()
+	elif given_anchor == ANCHOR.STICKER:
+		points = inset_shape_sticker()
+	$Inset.set_polygon(points)
+
+func find_sticker(context: Array):
+	for index in range(len(context)-1, -1, -1):
+		var object = context[index]
+		if object is Sticker:
+			return object
+
+func set_anchor_mode(new_anchor: ANCHOR, context: Array = []):
+	# If the previous anchor mode was STICKER, release the sticker that
+	# was held
+	if anchor == ANCHOR.STICKER:
+		anchor_sticker.position_changed.disconnect(follow_sticker)
+		anchor_sticker.unanchor_vertex(self)
+		anchor_sticker = null
+
+	if new_anchor in [ANCHOR.FREE, ANCHOR.VERTICAL, ANCHOR.HORIZONTAL, ANCHOR.CANVAS]:
+		anchor = new_anchor
+		set_inset_shape(anchor)
+		return true
+	else:
+		var sticker = find_sticker(context)
+		if sticker != null:
+			anchor = ANCHOR.STICKER
+			anchor_sticker = sticker
+			anchor_sticker_inv_transform = sticker.transform.affine_inverse()
+			anchor_sticker.position_changed.connect(follow_sticker)
+			sticker.anchor_vertex(self)
+			follow_sticker()
+			set_inset_shape(anchor)
+			return true
+		else:
+			return false
+			
+func follow_sticker():
+	if anchor_sticker != null:
+		var diff_transform = anchor_sticker.transform * anchor_sticker_inv_transform
+		var target_position = diff_transform * position
+		position = anchor_sticker.project_onto_object(target_position)
+		position_changed.emit()
+		anchor_sticker_inv_transform = anchor_sticker.transform.affine_inverse()
+
+# TODO: This should become part of the PuzzleObject interface
+func cycle_anchor_mode(context: Array = [], backwards = false):
+	var next_mode = anchor
+	while true:
+		if backwards:
+			next_mode = (next_mode + 4) % 5 as ANCHOR
+		else:
+			next_mode = (next_mode + 1) % 5 as ANCHOR
+		if set_anchor_mode(next_mode, context):
+			break
+
+func apply_anchor_constraints(point: Vector2):
+	var new_point = Vector2(point)
+	if anchor == ANCHOR.VERTICAL:
+		new_point.x = position.x
+	elif anchor == ANCHOR.HORIZONTAL:
+		new_point.y = position.y
+	elif anchor == ANCHOR.CANVAS or anchor == ANCHOR.STICKER:
+		new_point = position
+	return new_point		
+
+func _ready():
+	set_inset_shape(anchor)
+		
+
+#
+# PuzzleObject interface
+#
+
+func _set_virtual(value):
+	if value:
 		self.modulate = Color(1, 1, 1, 0.5)
 		$CollisionShape2D.disabled = true
 	else:
 		self.modulate = Color(1, 1, 1, 1)
 		$CollisionShape2D.disabled = false
 
+func _set_focused(value):
+	if value:
+		self.modulate = Color(1.2, 1.2, 1.2)
+	else:
+		self.modulate = Color(1, 1, 1)
 
-## And indicator if the vertex movement is locked in any direction.
-func set_inset():
-	var points = PackedVector2Array()
-	if not fixed_horizontal and not fixed_vertical:
-		points.append(Vector2(-3, -3))
-		points.append(Vector2(3, -3))
-		points.append(Vector2(3, 3))
-		points.append(Vector2(-3, 3))
-	elif fixed_horizontal and not fixed_vertical:
-		points.append(Vector2(-6, -2))
-		points.append(Vector2(6, -2))
-		points.append(Vector2(6, 2))
-		points.append(Vector2(-6, 2))
-	elif not fixed_horizontal and fixed_vertical:
-		points.append(Vector2(-2, -6))
-		points.append(Vector2(2, -6))
-		points.append(Vector2(2, 6))
-		points.append(Vector2(-2, 6))
-	elif fixed_horizontal and fixed_vertical:
-		points.append(Vector2(-6, -2))
-		points.append(Vector2(-2, -2))
-		points.append(Vector2(-2, -6))
-		points.append(Vector2(2, -6))
-		points.append(Vector2(2, -2))
-		points.append(Vector2(6, -2))
-		points.append(Vector2(6, 2))
-		points.append(Vector2(2, 2))
-		points.append(Vector2(2, 6))
-		points.append(Vector2(-2, 6))
-		points.append(Vector2(-2, 2))
-		points.append(Vector2(-6, 2))
-	$Inset.set_polygon(points)
-
-
-func fix_horizontal():
-	fixed_horizontal = true
-	set_inset()
-
-
-func unfix_horizontal():
-	fixed_horizontal = false
-	set_inset()
-
-
-func fix_vertical():
-	fixed_vertical = true
-	set_inset()
-
-
-func unfix_vertical():
-	fixed_vertical = false
-	set_inset()
-
-
-func store_position(position_to_store: Vector2):
-	stored_position = position_to_store
-
-
-func unstore_position():
-	stored_position = Vector2.INF
-
-
-func restore_position():
-	var position_to_restore = stored_position
-	unstore_position()
-	return position_to_restore
-
-
-var hovered: bool = false:
-	set(value):
-		hovered = value
-		update_color()
-
-var selected: bool = false:
-	set(value):
-		selected = value
-		update_color()
-
-var in_selection_box: bool = false:
-	set(value):
-		in_selection_box = value
-		update_color()
-
-@export var camera: Camera2D
-
-## Signal to notify edges that they need to update their position.
-signal position_changed
-
-signal captured_input_event(Vertex, InputEvent)
-signal captured_hover_event(Vertex, bool)
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	camera.zoom_changed.connect(update_zoom)
-
-
-# Called when the mouse is pressed
-func _input_event(_viewport, event, _shape_index):
-	captured_input_event.emit(self, event)
-
-
-func _mouse_enter():
-	captured_hover_event.emit(self, true)
-
-
-func _mouse_exit():
-	captured_hover_event.emit(self, false)
-
-
-func update_color():
-	if selected:
+func _set_active(value):
+	if value:
 		$Background.color = "cc9766"
-		$Inset.color = "3d3d3d"
-		$Outline.default_color = "3d3d3d"
-	elif hovered or in_selection_box:
-		$Background.color = "4f8dc4"
 		$Inset.color = "3d3d3d"
 		$Outline.default_color = "3d3d3d"
 	else:
@@ -149,6 +174,20 @@ func update_color():
 		$Inset.color = "3d3d3d"
 		$Outline.default_color = "3d3d3d"
 
+func store_position():
+	stored_position = position
 
-func update_zoom(zoom):
+func unstore_position():
+	stored_position = Vector2.INF
+
+func restore_position():
+	position = stored_position
+	unstore_position()
+	position_changed.emit()
+
+func on_zoom_change(zoom: Vector2):
 	self.scale = Vector2(1 / zoom.x, 1 / zoom.y)
+
+func project_onto_object(_pos: Vector2):
+	return global_position
+

@@ -6,19 +6,110 @@ var edge_scene = preload("res://Edge/edge.tscn")
 @export var state_machine: StateMachine
 @export var camera: Camera2D
 
-@onready var selection_box = $SelectionBox
-
 var bbox: Rect2
 var edges = []
 var stickers = []
 
-var current_hover = null
+#
+# Handling of hovered objects
+#
 
+# List of all objects that are currently under the mouse cursor.
+# Objects that have been entered last are at the end of the list.
+var hovered_objects: Array = []
+var hover_filter: Callable
+
+signal focus_changed
+
+func set_hover_filter(f: Callable):
+	hovered_objects = hovered_objects.filter(f)
+	hover_filter = f
+
+func reset_hover_filter():
+	hover_filter =  func(_object): return true
+
+## Called when an object in the puzzle canves receives mouse focus
+func handle_hover_event(object: PuzzleObject, mouse_enters: bool = true):
+	# Only need to handle hover events if they are not filtered
+	if not hover_filter.call(object):
+		return
+
+	# Remember the focused object
+	var prior_focus = get_focused_object()
+
+	# Have to distinguish between mouse enter and mouse leave events
+	if mouse_enters:
+		var index = hovered_objects.find(object)
+		if index != -1:
+			# If we land here, the mouse_exits event has not been handled
+			# successfully, since the mouse entered an object that is already
+			# hovered. Probably, this will not happen.
+			hovered_objects.remove_at(index)
+		# Manually tell the previous top object in the hovered_objects list
+		# that it should not be regarded to be hovered anymore
+		if len(hovered_objects) > 0:
+			hovered_objects[-1].set_focused(false)
+		# The new object is now on top of the list. It is considered the
+		# currently hovered object
+		hovered_objects.append(object)
+		object.set_focused(true)
+	else:
+		var index = hovered_objects.find(object)
+		if index >= 0:
+			hovered_objects.remove_at(index)
+			object.set_focused(false)
+		# If we have just removed the 
+		# Manually tell the next topmost object in the hovered_objects list
+		# that it should be regarded to be hovered 
+		if len(hovered_objects) > 0 and index == len(hovered_objects):
+			hovered_objects[-1].set_focused(true)
+
+	# Compare new focus to old focus
+	var new_focus = get_focused_object()
+	if prior_focus != new_focus:
+		# Emit a signal that the hovered object has changed
+		focus_changed.emit()
+
+## Returns the currently hovered object
+func get_focused_object():
+	if len(hovered_objects) > 0:
+		return hovered_objects[-1]
+	
+func get_hovered_objects():
+	return hovered_objects
+
+func get_topmost_hovered_vertex():
+	for index in range(len(hovered_objects)-1,-1,-1):
+		if hovered_objects[index] is Vertex:
+			return hovered_objects[index]
+
+func get_topmost_hovered_edge():
+	for index in range(len(hovered_objects)-1,-1,-1):
+		if hovered_objects[index] is Vertex:
+			return hovered_objects[index]
+
+func get_topmost_hovered_sticker():
+	for index in range(len(hovered_objects)-1,-1,-1):
+		if hovered_objects[index] is Sticker:
+			return hovered_objects[index]
+
+## Remove an item from the list of hovered objects. This should only be called
+## as cleanup by code that deletes objects.
+func unhover_object(object: PuzzleObject):
+	var index = hovered_objects.find(object)
+	if index >= 0:
+		hovered_objects.remove_at(index)
+
+
+#
+# Handling of selected objects
+#
 
 # We can only use a dictionary, there are no dedicated sets.
 # The actual value does not matter.
 ## The set of currently selected vertices.
-var current_selection: Dictionary = Dictionary()
+var selected_vertices: Dictionary = Dictionary()
+var selected_sticker: Sticker = null
 
 ## Triggered when the selection changes.
 signal selection_changed
@@ -34,10 +125,10 @@ func set_bbox(rect: Rect2):
 	points.append(bbox.position)
 	$BBox/Line2D.set_points(points)
 	$BBox/Polygon2D.set_polygon(points)
-	update_zoom(camera.zoom)
+	on_zoom_change(camera.zoom)
 
 ## The line thickness of the bbox is zoom-dependent
-func update_zoom(zoom):
+func on_zoom_change(zoom):
 	$BBox/Line2D.width = 7 / zoom.x
 
 
@@ -45,78 +136,42 @@ func update_zoom(zoom):
 func project_bbox(point: Vector2):
 	return point.clamp(bbox.position, bbox.position + bbox.size)
 
-
 ## Enforce all vertex constraints. If the vertex has the flags
 ## fixed_horizontal or fixed_vertical set to true, their y or x
 ## positions are not changed (unless required by the bbox projection)
-func enforce_constraints(vertex: Vertex, point: Vector2):
-	var new_point = Vector2(point)
-	if vertex.fixed_horizontal:
-		new_point.y = vertex.position.y
-	if vertex.fixed_vertical:
-		new_point.x = vertex.position.x
+func apply_vertex_constraints(vertex: Vertex, point: Vector2):
+	var new_point = vertex.apply_anchor_constraints(point)
 	return project_bbox(new_point)
 
+func apply_sticker_constraints(sticker: Sticker, trafo: Transform2D):
+	var new_trafo = sticker.apply_anchor_constraint(trafo)
+	return new_trafo
 
-func _ready():
-	var w = 7
-	var h = 5
-
-	var sharp_bbox = Rect2(Vector2(205, 105), Vector2((w-1) * 150, (h-1) * 150))
-	set_bbox(sharp_bbox)
-	camera.zoom_changed.connect(update_zoom)
-
-	var positions = {}
-	for x in range(0, w):
-		for y in range(0, h):
-			var vertex = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
-			positions[Vector2i(x, y)] = vertex
-
-			if x == 0 or x == w - 1: vertex.fix_vertical()
-			if y == 0 or y == h - 1: vertex.fix_horizontal()
-
-	for x in range(1, w):
-		for y in range(0, h):
-			var edge = create_edge(positions[Vector2i(x - 1, y)], positions[Vector2i(x, y)])
-			if y == 0 or y == h - 1:
-				edge.make_straight()
-
-	for x in range(0, w):
-		for y in range(1, h):
-			var edge = create_edge(positions[Vector2i(x, y - 1)], positions[Vector2i(x, y)])
-			if x == 0 or x == w - 1:
-				edge.make_straight()
-
-## Creates a new vertex and adds it to the canvas.
-func create_vertex(target_position: Vector2, substance = Vertex.SUBSTANCE.ACTUAL) -> Vertex:
-	var vertex = vertex_scene.instantiate()
-	vertex.set_substance( substance )
-	move_vertex_to(vertex, target_position)
-	vertex.z_index = 2
-	vertex.camera = camera
-	vertex.update_zoom(camera.zoom)
-
-	# Since all events potentially affect multiple vertices, we delegate
-	# the events to the canvas (Self), which can then handle them.
-	vertex.captured_input_event.connect(state_machine.vertex_input_event)
-	vertex.captured_hover_event.connect(state_machine.vertex_hover_event)
-	add_child(vertex)
-	return vertex
-
+#
+# Edge management
+#
 
 ## Creates an edge between the two vertices.
 func create_edge(left: Vertex, right: Vertex) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
-	edge.set_points_before_init($EdgeGenerator.random_line())
-	edge.captured_input_event.connect(state_machine.edge_input_event)
+	edge.set_skeleton($EdgeGenerator.random_line())
+	edge.set_focused(false, true) # force all edges in non-focused mode
+	edge.captured_hover_event.connect(handle_hover_event)
+	camera.zoom_changed.connect(edge.on_zoom_change)
 
 	edges.append(edge)
 	edge.left_vertex = left
 	edge.right_vertex = right
-	edge.camera = camera
 	add_child(edge)
 	selection_changed.emit()
 	return edge
+
+## Remove an edge from the puzzle canvas
+func delete_edge(edge: Edge):
+	unhover_object(edge)
+	edges.erase(edge)
+	edge.queue_free()
+	selection_changed.emit()
 
 ## Returns the edge between the two vertices, or null if there is none.
 func find_edge(left: Vertex, right: Vertex) -> Edge:
@@ -127,30 +182,56 @@ func find_edge(left: Vertex, right: Vertex) -> Edge:
 			return edge
 	return null
 
+func find_edges_to_active_vertices(vertex: Vertex) -> Array:
+	var found_edges = []
+	for edge in edges:
+		if edge.left_vertex == vertex and edge.right_vertex.active:
+			found_edges.append(edge)
+		if edge.right_vertex == vertex and edge.left_vertex.active:
+			found_edges.append(edge)
+	return found_edges
 
 ## Returns an array containing all currently selected edges
 func get_selected_edges() -> Array:
 	var result = []
 	for edge in edges:
-		if edge.left_vertex in current_selection and edge.right_vertex in current_selection:
+		if edge.left_vertex in selected_vertices and edge.right_vertex in selected_vertices:
 			result.append(edge)
 	return result
 
-## Remove an edge from the puzzle canvas
-func delete_edge(edge: Edge):
-	edges.erase(edge)
-	edge.queue_free()
-	selection_changed.emit()
 
+#
+# Vertex management
+#
+
+## Creates a new vertex and adds it to the canvas.
+func create_vertex(target_position: Vector2) -> Vertex:
+	var vertex = vertex_scene.instantiate()
+	move_vertex_to(vertex, target_position)
+	camera.zoom_changed.connect(vertex.on_zoom_change)
+	vertex.on_zoom_change(camera.zoom)
+
+	# Hovering events are currently managed by the canvas
+	vertex.captured_hover_event.connect(handle_hover_event)
+
+	add_child(vertex)
+	return vertex
+
+## Delete a vertex from the puzzle canvas
 func delete_vertex(vertex: Vertex):
-	for index in range(len(edges)-1, -1, -1):
-		var edge = edges[index]
+	var edges_to_delete = []
+	for edge in edges:
 		if edge.is_connected_to(vertex):
-			edge.queue_free()
-			edges.remove_at(index)
-	if vertex == current_hover:
-		current_hover = null
+			edges_to_delete.append(edge)
+
+	for edge in edges_to_delete:
+		delete_edge(edge)
+
+	if vertex.anchor_sticker != null:
+		vertex.anchor_sticker.unanchor_vertex(vertex)
+
 	deselect_vertex(vertex)
+	unhover_object(vertex)
 	vertex.queue_free()
 			
 
@@ -158,7 +239,7 @@ func delete_vertex(vertex: Vertex):
 ## the bounding box, project the vertex onto it. *All* modifications
 ## of a vertex' position should go through this function.
 func move_vertex_to(vertex: Vertex, target_position: Vector2):
-	var new_position = enforce_constraints(vertex, target_position)
+	var new_position = apply_vertex_constraints(vertex, target_position)
 	if vertex.position != new_position:
 		vertex.position = new_position
 		vertex.position_changed.emit()
@@ -168,79 +249,105 @@ func move_vertex_by(vertex: Vertex, delta: Vector2):
 	var target_position = vertex.position + delta
 	move_vertex_to(vertex, target_position)
 
-## Notify vertex that a dragging event starts
-func drag_vertex_start(vertex: Vertex):
-	vertex.store_position(vertex.position)
-
-## Notify vertex that a dragging event finished sucessfully
-func drag_vertex_end(vertex: Vertex):
-	vertex.unstore_position()
-	
-## Notify vertex that a dragging event was aborted
-func drag_vertex_rollback(vertex: Vertex):
-	move_vertex_to(vertex, vertex.restore_position())
-
 ## Removes a vertex from the selection set, if it is inside.
 func deselect_vertex(vertex):
-	current_selection.erase(vertex)
-	vertex.selected = false
+	selected_vertices.erase(vertex)
+	vertex.set_active(false)
+	for edge in find_edges_to_active_vertices(vertex):
+		edge.set_active(false)
 	selection_changed.emit()
-
 
 ## Removes all vertices from the selection set.
 func deselect_all_vertices():
-	for vertex in current_selection:
-		vertex.selected = false
-	current_selection.clear()
+	for vertex in selected_vertices:
+		vertex.set_active(false)
+	for edge in edges:
+		edge.set_active(false)
+	selected_vertices.clear()
 	selection_changed.emit()
-
 
 ## Adds a vertex to the selection set.
 func select_vertex(vertex):
-	current_selection[vertex] = true
-	vertex.selected = true
+	selected_vertices[vertex] = true
+	vertex.set_active(true)
+	for edge in find_edges_to_active_vertices(vertex):
+		edge.set_active(true)
 	selection_changed.emit()
 
-## Applies a function to all currently selected vertices. (Vertices)
+## Applies a function to all currently selected vertices.
 ## It also applies on the current hover if it is not selected.
 func apply_on_selected_vertices(fkt):
-	for any_vertex in current_selection:
+	for any_vertex in selected_vertices:
 		fkt.call(any_vertex)
-	if current_hover != null and current_hover not in current_selection:
-		fkt.call(current_hover)
 
 func move_selected_vertices_by(delta: Vector2):
 	apply_on_selected_vertices(func(vertex): move_vertex_by(vertex, delta))
 
 
+#
+# Sticker management
+#
+
 func add_sticker(sticker: Sticker):
 	stickers.append(sticker)
 	add_child(sticker)
-	sticker.captured_input_event.connect(state_machine.sticker_input_event)
-	sticker.captured_hover_event.connect(state_machine.sticker_hover_event)
+	sticker.captured_hover_event.connect(handle_hover_event)
+	camera.zoom_changed.connect(sticker.on_zoom_change)
+
+func select_sticker(sticker: Sticker):
+	if selected_sticker == sticker:
+		return
+	if selected_sticker != null:
+		selected_sticker.set_active(false)
+	selected_sticker = sticker
+	selected_sticker.set_active(true)
+
+func deselect_sticker():
+	if selected_sticker != null:
+		selected_sticker.set_active(false)
+		selected_sticker = null
 
 func move_sticker_to(sticker: Sticker, target_position: Vector2):
-	sticker.transform = Transform2D(0, target_position)
+	var new_transform = Transform2D(0, target_position) * sticker.transform
+	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.position_changed.emit()
 
 func move_sticker_by(sticker: Sticker, delta: Vector2):
-	sticker.transform = sticker.transform.translated(delta)
+	var new_transform = sticker.transform.translated(delta)
+	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.position_changed.emit()
 
 ## Change the sticker size by a factor of zoom while keeping the global
 ## mouse position pinned.
-func zoom_sticker(sticker: Sticker, zoom: float):
-	var additional_transform = FixedPointTransform2D.build_scale_matrix(zoom, get_global_mouse_position())
-	sticker.transform = additional_transform * sticker.transform
+func scale_sticker(sticker: Sticker, zoom: float):
+	var additional_transform = FixedPointTransform2D.build_scale_matrix(zoom, sticker.get_center())
+	var new_transform = additional_transform * sticker.transform
+	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.position_changed.emit()
 
+## Rotate a given sticker
 func rotate_sticker(sticker: Sticker, sticker_rotation: float):
-	var additional_transform = FixedPointTransform2D.build_rotation_matrix(sticker_rotation, get_global_mouse_position())
-	sticker.transform = additional_transform * sticker.transform
+	var additional_transform = FixedPointTransform2D.build_rotation_matrix(sticker_rotation, sticker.get_center())
+	var new_transform = additional_transform * sticker.transform
+	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.position_changed.emit()
 
 ## Delets a sticker. Any Vertices that are currently attached to the sticker
 ## will be detached and kept in the puzzle.
 func delete_sticker(sticker: Sticker):
+	unhover_object(sticker)
+	for vertex in sticker.anchored_vertices:
+		vertex.set_anchor_mode(Vertex.ANCHOR.FREE)
 	stickers.erase(sticker)
 	sticker.queue_free()
 
+
+func deselect_all():
+	deselect_all_vertices()
+	deselect_sticker()
+
+
+## Save the current puzzle canvas to an svg file
 func saveToFile():
 	var file = FileAccess.open("user://jigsaw.svg", FileAccess.WRITE)
 	file.store_string("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
@@ -263,11 +370,51 @@ func edge_path(edge: Edge) -> String:
 
 	return svg_path
 
+## Initialize the Puzzle Canvas on entering the scene tree
+func _ready():
+
+	# By default, the 
+	reset_hover_filter()
+	
+	var w = 7
+	var h = 5
+
+	var sharp_bbox = Rect2(Vector2(205, 105), Vector2((w-1) * 150, (h-1) * 150))
+	set_bbox(sharp_bbox)
+	camera.zoom_changed.connect(on_zoom_change)
+
+	var positions = {}
+	for x in range(0, w):
+		for y in range(0, h):
+			var vertex = create_vertex(Vector2(150 * x + 205, 150 * y + 105))
+			positions[Vector2i(x, y)] = vertex
+
+			var anchor_vertical = (x == 0 or x == w - 1)
+			var anchor_horizontal = (y == 0 or y == h - 1)
+			if anchor_vertical and anchor_horizontal:
+				vertex.set_anchor_mode(Vertex.ANCHOR.CANVAS)
+			elif anchor_vertical:
+				vertex.set_anchor_mode(Vertex.ANCHOR.VERTICAL)
+			elif anchor_horizontal:
+				vertex.set_anchor_mode(Vertex.ANCHOR.HORIZONTAL)
+
+	for x in range(1, w):
+		for y in range(0, h):
+			var edge = create_edge(positions[Vector2i(x - 1, y)], positions[Vector2i(x, y)])
+			if y == 0 or y == h - 1:
+				edge.make_straight()
+
+	for x in range(0, w):
+		for y in range(1, h):
+			var edge = create_edge(positions[Vector2i(x, y - 1)], positions[Vector2i(x, y)])
+			if x == 0 or x == w - 1:
+				edge.make_straight()
+
 ## Pass along unhandled input to the state machine
 func _unhandled_input(event):
 	state_machine.unhandled_input(event)
 
+## Pass along input to the state machine
 func _input(event):
 	state_machine.input(event)
-
 

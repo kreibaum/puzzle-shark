@@ -29,14 +29,6 @@ func set_input_as_handled():
 	ui_canvas.get_viewport().set_input_as_handled()
 
 
-func vertex_input_event(vertex: Vertex, event: InputEvent):
-	pass
-
-
-func vertex_hover_event(vertex: Vertex, is_hovering: bool):
-	pass
-
-
 func edge_input_event(edge: Edge, event: InputEvent):
 	pass
 

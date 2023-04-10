@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dyc6c54y42qvt"]
+
+[ext_resource type="Script" path="res://UI/SelectionBox.gd" id="1_37vmy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_awmdd"]
+size = Vector2(1, 1)
+
+[node name="SelectionBox" type="Area2D"]
+script = ExtResource("1_37vmy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_awmdd")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(1, 1, 1, 0.219608)
+polygon = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)

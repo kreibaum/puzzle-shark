@@ -9,7 +9,7 @@ func _ready():
 
 
 func _on_Button_pressed():
-	# Check if exactly two points are selected in the canvas.current_selection
+	# Check if exactly two points are selected in the canvas.selected_vertices
 	# dictionary. If so, add a delete the edge between them.
 
 	for edge in canvas.get_selected_edges():

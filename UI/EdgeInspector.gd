@@ -67,6 +67,6 @@ func shift_ends(lShift: float, rShift: float):
 		points[0] = left.lerp(right, lShift)
 		points[-1] = right.lerp(left, rShift)
 
-		edge.set_points_before_init(points)
+		edge.set_skeleton(points)
 		edge.smooth_and_update()
 		canvas.selection_changed.emit()
