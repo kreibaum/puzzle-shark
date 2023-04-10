@@ -19,6 +19,29 @@ var bbox: Rect2 = Rect2(Vector2.INF, Vector2.INF)
 ## List of vertices that are anchored to the sticker
 var anchored_vertices: Array = []
 
+## Smooth transformations
+var transform_target: Transform2D = transform
+var transform_start: Transform2D
+var transform_tween: Tween
+
+func set_transform_hard(trafo: Transform2D):
+	if transform_tween: transform_tween.kill()
+	transform_target = trafo
+	transform = trafo
+	position_changed.emit()
+
+func set_transform_smooth(trafo: Transform2D):
+	if transform_tween: transform_tween.kill()
+	transform_start = transform
+	transform_target = trafo
+	transform_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
+	transform_tween.tween_method(interpolate_transform, 0.0, 1.0, 0.5)
+
+func interpolate_transform(t: float):
+	transform = transform_start.interpolate_with(transform_target, t)
+	position_changed.emit()
+
+
 func anchor_vertex(vertex: Vertex):
 	anchored_vertices.append(vertex)
 

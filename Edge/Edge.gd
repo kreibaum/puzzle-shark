@@ -152,6 +152,9 @@ func update():
 func get_shape_points() -> PackedVector2Array:
 	return self.transform * self.points
 
+func get_center():
+	return self.transform * Vector2(50, 0)
+
 ## Check if a vertex is part of this edge
 func is_connected_to(vertex: Vertex):
 	return left_vertex == vertex or right_vertex == vertex

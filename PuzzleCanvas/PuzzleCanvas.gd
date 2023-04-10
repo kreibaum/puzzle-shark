@@ -166,6 +166,16 @@ func create_edge(left: Vertex, right: Vertex) -> Edge:
 	selection_changed.emit()
 	return edge
 
+func scale_edge(edge: Edge, zoom: float):
+	var vertex_transform = FixedPointTransform2D.build_scale_matrix(zoom, edge.get_center())
+	move_vertex_to(edge.left_vertex, vertex_transform * edge.left_vertex.position)
+	move_vertex_to(edge.right_vertex, vertex_transform * edge.right_vertex.position)
+
+func rotate_edge(edge: Edge, angle: float):
+	var vertex_transform = FixedPointTransform2D.build_rotation_matrix(angle, edge.get_center())
+	move_vertex_to(edge.left_vertex, vertex_transform * edge.left_vertex.position)
+	move_vertex_to(edge.right_vertex, vertex_transform * edge.right_vertex.position)
+
 ## Remove an edge from the puzzle canvas
 func delete_edge(edge: Edge):
 	unhover_object(edge)
@@ -308,36 +318,40 @@ func deselect_sticker():
 		selected_sticker = null
 
 func move_sticker_to(sticker: Sticker, target_position: Vector2):
-	var new_transform = Transform2D(0, target_position) * sticker.transform
-	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	var new_transform = Transform2D(0, target_position) * sticker.transform_target
+	new_transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.set_transform_hard(new_transform)
 	sticker.position_changed.emit()
 
 func move_sticker_by(sticker: Sticker, delta: Vector2):
-	var new_transform = sticker.transform.translated(delta)
-	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	var new_transform = sticker.transform_target.translated(delta)
+	new_transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.set_transform_hard(new_transform)
 	sticker.position_changed.emit()
 
 ## Change the sticker size by a factor of zoom while keeping the global
 ## mouse position pinned.
 func scale_sticker(sticker: Sticker, zoom: float):
 	var additional_transform = FixedPointTransform2D.build_scale_matrix(zoom, sticker.get_center())
-	var new_transform = additional_transform * sticker.transform
-	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	var new_transform = additional_transform * sticker.transform_target
+	new_transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.set_transform_smooth(new_transform)
 	sticker.position_changed.emit()
 
 ## Rotate a given sticker
 func rotate_sticker(sticker: Sticker, sticker_rotation: float):
 	var additional_transform = FixedPointTransform2D.build_rotation_matrix(sticker_rotation, sticker.get_center())
-	var new_transform = additional_transform * sticker.transform
-	sticker.transform = apply_sticker_constraints(sticker, new_transform)
+	var new_transform = additional_transform * sticker.transform_target
+	new_transform = apply_sticker_constraints(sticker, new_transform)
+	sticker.set_transform_smooth(new_transform)
 	sticker.position_changed.emit()
 
 ## Delets a sticker. Any Vertices that are currently attached to the sticker
 ## will be detached and kept in the puzzle.
 func delete_sticker(sticker: Sticker):
-	unhover_object(sticker)
-	for vertex in sticker.anchored_vertices:
+	for vertex in sticker.anchored_vertices.duplicate():
 		vertex.set_anchor_mode(Vertex.ANCHOR.FREE)
+	unhover_object(sticker)
 	stickers.erase(sticker)
 	sticker.queue_free()
 

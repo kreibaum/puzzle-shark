@@ -207,15 +207,24 @@ func handle_interrupt_sticker(sticker: Sticker):
 # Rotations and scalings of Stickers and edges
 #
 
+## Returns the object that is currently affected by rotations
 func get_rotation_object():
-	var edges = canvas.get_selected_edges()
-	if canvas.selected_sticker != null:
-		return canvas.selected_sticker
-	elif len(edges) == 1:
-		return edges[0]
+	# If an object is focused, take it
+	var object = canvas.get_focused_object()
+	if object != null:
+		return object
+	# If no object is focused, search for either a selected sticker or 
+	# a single selected edge
 	else:
-		return canvas.get_focused_object()
+		var edges = canvas.get_selected_edges()
+		if canvas.selected_sticker != null:
+			return canvas.selected_sticker
+		elif len(edges) == 1:
+			return edges[0]
+		else:
+			return
 
+## Returns the object that is currently affected by scalings
 func get_scale_object():
 	return get_rotation_object()
 
@@ -265,29 +274,24 @@ func handle_interrupt_box():
 
 
 func handle_anchor(object: PuzzleObject, backwards = false):
+	# First see if an object is focused. The focused object receives priority
+	# for setting the anchor
+	if object != null:
+		object.cycle_anchor_mode(canvas.hovered_objects, backwards)
+	# If nothing is focused, search for selected objects
 	# Depending on the context of the action, we either want the object to be
 	# able to anchor on other puzzle objects or not
-	if len(canvas.selected_vertices) > 0:
-		print("a")
+	elif len(canvas.selected_vertices) > 0:
 		for vertex in canvas.selected_vertices:
 			if len(canvas.selected_vertices) == 1 and vertex in canvas.hovered_objects:
-				print("aa")
 				vertex.cycle_anchor_mode(canvas.hovered_objects, backwards)
 			else:
-				print("ab")
 				vertex.cycle_anchor_mode([], backwards)
 	elif canvas.selected_sticker != null:
-		print("b")
 		if canvas.selected_sticker == object:
-			print("ba")
 			canvas.selected_sticker.cycle_anchor_mode(canvas.hovered_objects, backwards)
 		else:
-			print("bb")
 			canvas.selected_sticker.cycle_anchor_mode([], backwards)
-	elif object != null:
-		print("c")
-		object.cycle_anchor_mode(canvas.hovered_objects, backwards)
-	print("end")
 	set_input_as_handled()
 
 func input(event):
@@ -296,11 +300,8 @@ func input(event):
 		# A right click when we are not currently involved in any actions means
 		# that we cycle through anchor modes
 		var idle = (drag_position == Vector2.INF and selection_box == null)
-		print("action took place")
 		if Input.is_action_just_pressed("RightClick") and idle:
-			print("action took place here")
 			var object = canvas.get_focused_object()
-			print(object)
 			if Input.is_key_pressed(KEY_SHIFT):
 				handle_anchor(object, true)
 			else:
@@ -361,7 +362,7 @@ func input(event):
 	if Input.is_action_just_pressed("RotateRightFine"):
 		source_object = get_rotation_object()
 		if source_object is Edge:
-			pass
+			canvas.rotate_edge(source_object, 1.0 * PI / 180)
 		elif source_object is Sticker:
 			canvas.rotate_sticker(source_object, 1.0 * PI / 180)
 		set_input_as_handled()
@@ -369,7 +370,7 @@ func input(event):
 	elif Input.is_action_just_pressed("RotateRight"):
 		source_object = get_rotation_object()
 		if source_object is Edge:
-			pass
+			canvas.rotate_edge(source_object, 10.0 * PI / 180.0)
 		elif source_object is Sticker:
 			canvas.rotate_sticker(source_object, 10.0 * PI / 180.0)
 		set_input_as_handled()
@@ -377,7 +378,7 @@ func input(event):
 	elif Input.is_action_just_pressed("RotateLeftFine"):
 		source_object = get_rotation_object()
 		if source_object is Edge:
-			pass
+			canvas.rotate_edge(source_object, -1.0 * PI / 180.0)
 		elif source_object is Sticker:
 			canvas.rotate_sticker(source_object, -1.0 * PI / 180.0)
 		set_input_as_handled()
@@ -385,7 +386,7 @@ func input(event):
 	elif Input.is_action_just_pressed("RotateLeft"):
 		source_object = get_rotation_object()
 		if source_object is Edge:
-			pass
+			canvas.rotate_edge(source_object, -10.0 * PI / 180.0)
 		elif source_object is Sticker:
 			canvas.rotate_sticker(source_object, -10.0 * PI / 180.0)
 		set_input_as_handled()
@@ -393,7 +394,7 @@ func input(event):
 	elif Input.is_action_just_pressed("ScaleUpFine"):
 		source_object = get_scale_object()
 		if source_object is Edge:
-			pass
+			canvas.scale_edge(source_object, 1.01)
 		elif source_object is Sticker:
 			canvas.scale_sticker(source_object, 1.01)
 		set_input_as_handled()
@@ -401,7 +402,7 @@ func input(event):
 	elif Input.is_action_just_pressed("ScaleUp"):
 		source_object = get_scale_object()
 		if source_object is Edge:
-			pass
+			canvas.scale_edge(source_object, 1.1)
 		elif source_object is Sticker:
 			canvas.scale_sticker(source_object, 1.1)
 		set_input_as_handled()
@@ -409,7 +410,7 @@ func input(event):
 	elif Input.is_action_just_pressed("ScaleDownFine"):
 		source_object = get_scale_object()
 		if source_object is Edge:
-			pass
+			canvas.scale_edge(source_object, 1 / 1.01)
 		elif source_object is Sticker:
 			canvas.scale_sticker(source_object, 1 / 1.01)
 		set_input_as_handled()
@@ -417,7 +418,7 @@ func input(event):
 	elif Input.is_action_just_pressed("ScaleDown"):
 		source_object = get_scale_object()
 		if source_object is Edge:
-			pass
+			canvas.scale_edge(source_object, 1 / 1.1)
 		elif source_object is Sticker:
 			canvas.scale_sticker(source_object, 1 / 1.1)
 		set_input_as_handled()

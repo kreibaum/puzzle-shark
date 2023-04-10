@@ -19,11 +19,10 @@ const CONSTRUCTOR_INDEX = 2
 
 func state_definitions():
 	return [
-		["Select", KEY_X, func(): return SelectTool.new()],
-		["Delete", KEY_V, func(): return DeleteTool.new()],
-		["Create", KEY_L, func(): return CreateTool.new()],
-		["Sticker", KEY_U, func(): return StickerTool.new()],
-		["Sculpt", KEY_I, func(): return SelectTool.new()]
+		["Arrange", "ArrangeTool", func(): return SelectTool.new()],
+		["Create", "CreateTool", func(): return CreateTool.new()],
+		["Delete", "DeleteTool", func(): return DeleteTool.new()],
+		# ["Sculpt", KEY_I, func(): return SelectTool.new()]
 	]
 
 
@@ -47,13 +46,21 @@ func on_item_selected(index):
 
 
 ## Looks for key events and switches to the state that matches the key.
-func _unhandled_input(event):
-	if event is InputEventKey and event.pressed:
-		var key_event = event as InputEventKey
-		# Find the state that matches the key
-		for index in range(state_definitions().size()):
-			if state_definitions()[index][SHORTCUT_INDEX] == key_event.keycode:
-				if !is_selected(index):
-					select_state(state_definitions()[index])
-					select(index)
-				return
+func _unhandled_input(_event):
+	for index in range(state_definitions().size()):
+		var action = state_definitions()[index][SHORTCUT_INDEX]
+		if Input.is_action_just_pressed(action):
+			if !is_selected(index):
+				select_state(state_definitions()[index])
+				select(index)
+			return
+	# if Input.is_action_just_pressed()
+	# if event is InputEventKey and event.pressed:
+	# 	var key_event = event as InputEventKey
+	# 	# Find the state that matches the key
+	# 	for index in range(state_definitions().size()):
+	# 		if state_definitions()[index][SHORTCUT_INDEX] == key_event.keycode:
+	# 			if !is_selected(index):
+	# 				select_state(state_definitions()[index])
+	# 				select(index)
+	# 			return
