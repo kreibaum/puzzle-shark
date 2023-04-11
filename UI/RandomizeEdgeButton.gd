@@ -1,11 +1,4 @@
-extends Button
-
-@export var canvas: PuzzleCanvas
-
-
-func _ready():
-	# hook up the button's "pressed" signal to our "_on_Button_pressed" callback
-	pressed.connect(_on_Button_pressed)
+extends PriorityButton
 
 
 func _on_Button_pressed():
