@@ -14,6 +14,48 @@ func _ready():
 	$SmallEdgeButtons/RightShiftEdgeButton.pressed.connect(right_shift_edge)
 
 
+var click_started_on_button = null
+
+
+func hovered_button() -> Button:
+	if $SmallEdgeButtons/LongerEdgeButton.is_hovered():
+		return $SmallEdgeButtons/LongerEdgeButton
+	if $SmallEdgeButtons/ShorterEdgeButton.is_hovered():
+		return $SmallEdgeButtons/ShorterEdgeButton
+	if $SmallEdgeButtons/LeftShiftEdgeButton.is_hovered():
+		return $SmallEdgeButtons/LeftShiftEdgeButton
+	if $SmallEdgeButtons/RightShiftEdgeButton.is_hovered():
+		return $SmallEdgeButtons/RightShiftEdgeButton
+	return null
+
+
+func _input(event):
+	var button = hovered_button()
+	if button != null || click_started_on_button:
+		if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT:
+			if event.is_pressed():
+				click_started_on_button = button
+				get_viewport().set_input_as_handled()
+			elif button == click_started_on_button:
+				click_started_on_button = null
+				_on_Button_pressed(button)
+				get_viewport().set_input_as_handled()
+			else:
+				click_started_on_button = null
+				get_viewport().set_input_as_handled()
+
+
+func _on_Button_pressed(button: Button):
+	if button == $SmallEdgeButtons/LongerEdgeButton:
+		grow_edge()
+	elif button == $SmallEdgeButtons/ShorterEdgeButton:
+		shrink_edge()
+	elif button == $SmallEdgeButtons/LeftShiftEdgeButton:
+		left_shift_edge()
+	elif button == $SmallEdgeButtons/RightShiftEdgeButton:
+		right_shift_edge()
+
+
 func _on_selection_changed():
 	var selected_edges = canvas.get_selected_edges()
 	var edge_count = selected_edges.size()
@@ -41,19 +83,19 @@ func _on_selection_changed():
 
 
 func grow_edge():
-	shift_ends(0.05, 0.05)
+	shift_ends(5, -5)
 
 
 func shrink_edge():
-	shift_ends(-0.05, -0.05)
+	shift_ends(-5, 5)
 
 
 func left_shift_edge():
-	shift_ends(0.05, -0.05)
+	shift_ends(5, 5)
 
 
 func right_shift_edge():
-	shift_ends(-0.05, 0.05)
+	shift_ends(-5, -5)
 
 
 func shift_ends(lShift: float, rShift: float):
@@ -61,12 +103,11 @@ func shift_ends(lShift: float, rShift: float):
 	for edge in selected_edges:
 		# Get both controll nodes at each end of the edge.
 		# Move them apart / towards each other.
-		var points = edge.original_points
-		var left = points[0]
-		var right = points[-1]
-		points[0] = left.lerp(right, lShift)
-		points[-1] = right.lerp(left, rShift)
+		# This depends on the skeleton already being normalized.
+		var points = edge.skeleton
+		points[0] += Vector2(lShift, 0)
+		points[-1] += Vector2(rShift, 0)
 
-		edge.set_points_before_init(points)
-		edge.smooth_and_update()
+		edge.set_skeleton(points)
+		edge.update()
 		canvas.selection_changed.emit()

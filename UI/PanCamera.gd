@@ -16,8 +16,8 @@ func _process(_delta: float):
 
 func _unhandled_input(event):
 	# Disable the camera when pressing ctrl
-	if Input.is_key_pressed(KEY_CTRL):
-		return
+	# if Input.is_key_pressed(KEY_CTRL):
+	# 	return
 
 	if Input.is_action_just_pressed("Drag"):
 		drag_start()

@@ -18,14 +18,6 @@ func set_state(new_state: State):
 	current_state.enter_state(canvas, ui_canvas)
 
 
-func vertex_input_event(vertex: Vertex, event: InputEvent):
-	current_state.vertex_input_event(vertex, event)
-
-
-func vertex_hover_event(vertex: Vertex, is_hovering: bool):
-	current_state.vertex_hover_event(vertex, is_hovering)
-
-
 func sticker_input_event(vertex: Sticker, event: InputEvent):
 	current_state.sticker_input_event(vertex, event)
 

@@ -1,15 +1,8 @@
-extends Button
-
-@export var canvas: PuzzleCanvas
-
-
-func _ready():
-	# hook up the button's "pressed" signal to our "_on_Button_pressed" callback
-	pressed.connect(_on_Button_pressed)
+extends PriorityButton
 
 
 func _on_Button_pressed():
-	# Check if exactly two points are selected in the canvas.current_selection
+	# Check if exactly two points are selected in the canvas.selected_vertices
 	# dictionary. If so, randomize the line between those two points.
 
 	# Randomization essentially just deletes a line and creates a new one.

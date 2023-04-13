@@ -5,17 +5,25 @@ class_name SelectionBox extends Area2D
 ## selection.
 
 var current_selection: Array = []
+var bbox: Rect2
 
 var is_selecting: bool = false
 var selection_start: Vector2
 var selection_end: Vector2
 var selection_needs_update: int = 0
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass  # Replace with function body.
 
+func _draw():
+	var points = PackedVector2Array()
+	points.append(Vector2(0, 0))
+	points.append(Vector2(0, 1))
+	points.append(Vector2(1, 1))
+	points.append(Vector2(1, 0))
+	points.append(Vector2(0, 0))
+	draw_polyline(points, Color(0.3, 0.3, 0.3), -1, false)
 
 ## Start using the SelectionBox at the current mouse position.
 func start_selection():
@@ -37,15 +45,19 @@ func move_selection():
 ## Hides and closes the SelectionBox
 func end_selection():
 	is_selecting = false
+	selection_needs_update = 0
 	selection_start = Vector2.INF
 	selection_end = Vector2.INF
-	_update_selection()
-	selection_needs_update = 2
+	hide()
+	# _update_selection()
+	# selection_needs_update = 2
 
 
 # Update collider & visual elements of the SelectionBox.
 func _update_selection():
 	transform = Transform2D(0, self.selection_end - self.selection_start, 0, self.selection_start)
+	bbox = Rect2(transform * Vector2.ZERO, Vector2.ZERO)
+	bbox = bbox.expand(transform * Vector2.ONE)
 	selection_needs_update = 2
 
 	if !is_selecting:
@@ -57,10 +69,16 @@ func _process(_delta):
 	# This means updating the selection must happen defered.
 	if selection_needs_update > 0:
 		for vertex in current_selection:
-			if vertex is Vertex:
-				vertex.in_selection_box = false
-		current_selection = get_overlapping_areas()
-		for vertex in current_selection:
-			if vertex is Vertex:
-				vertex.in_selection_box = true
+			vertex.set_active(false)
+
+		var overlapping_areas = get_overlapping_areas()
+		current_selection = []
+
+		
+		for vertex in overlapping_areas:
+			if vertex is Vertex and bbox.has_point(vertex.global_position):
+				vertex.set_active(true)
+				current_selection.append(vertex)
+
 		selection_needs_update -= 1
+
