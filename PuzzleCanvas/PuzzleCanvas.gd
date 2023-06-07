@@ -22,6 +22,18 @@ var hover_filter: Callable
 signal focus_changed
 
 
+func clear():
+	reset_hover_filter()
+	for edge in edges:
+		delete_edge(edge)
+
+	for vertex in $VertexContainer.get_children():
+		delete_vertex(vertex)
+
+	for sticker in stickers:
+		delete_sticker(sticker)
+
+
 ## Sets up a hover filter which can restrict hover events to a subset of
 ## objects. For example you can make edges not hoverable.
 func set_hover_filter(f: Callable):
@@ -249,7 +261,7 @@ func create_vertex(target_position: Vector2) -> Vertex:
 	# Hovering events are currently managed by the canvas
 	vertex.captured_hover_event.connect(handle_hover_event)
 
-	add_child(vertex)
+	$VertexContainer.add_child(vertex)
 	return vertex
 
 
