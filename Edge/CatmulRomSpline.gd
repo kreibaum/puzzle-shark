@@ -1,25 +1,14 @@
-class_name CatmulRomSpline extends Line2D
-
-@export var samples: int = 128
-
-# A spline follows several points. These points are called "control points".
-var control_points: PackedVector2Array
-
-# Each control point is associated with a time value.
-var control_times: PackedFloat32Array
-
-var is_relevant: bool = false
+class_name CatmulRomSpline extends Object
 
 # Called when the node enters the scene tree for the first time.
-func refresh_samples(guide: PackedVector2Array):
+static func refresh_samples(control_points: PackedVector2Array, samples: int) -> PackedVector2Array:
 	# We do a Catmul-Rom spline interpolation between the points of the Line2D
 	# node that guides the spline.
 
-	control_points = guide
 	if control_points.size() < 4:
-		return
+		return control_points.duplicate()
 
-	control_times = PackedFloat32Array()
+	var control_times = PackedFloat32Array()
 	control_times.append(0.0)
 	for i in range(1, control_points.size()):
 		var alpha = 0.5  # Regular Catmul-Rom spline.
@@ -40,28 +29,27 @@ func refresh_samples(guide: PackedVector2Array):
 		while index < control_times.size() - 1 and control_times[index + 1] < t:
 			index += 1
 
-		var t0 = control_times[clp(index - 1)]
-		var t1 = control_times[clp(index)]
-		var t2 = control_times[clp(index + 1)]
-		var t3 = control_times[clp(index + 2)]
+		var size = control_points.size()
+		var t0 = control_times[clp(index - 1, size)]
+		var t1 = control_times[clp(index, size)]
+		var t2 = control_times[clp(index + 1, size)]
+		var t3 = control_times[clp(index + 2, size)]
 
-		var p0 = control_points[clp(index - 1)]
-		var p1 = control_points[clp(index)]
-		var p2 = control_points[clp(index + 1)]
-		var p3 = control_points[clp(index + 2)]
+		var p0 = control_points[clp(index - 1, size)]
+		var p1 = control_points[clp(index, size)]
+		var p2 = control_points[clp(index + 1, size)]
+		var p3 = control_points[clp(index + 2, size)]
 
 		var point = interpolate_one_point(p0, p1, p2, p3, t0, t1, t2, t3, t)
 		sample_points.append(point)
 
 	sample_points.append(control_points[control_points.size() - 1])
-
-	points = sample_points
-	is_relevant = true
+	return sample_points
 
 
 # Clamp function, that is context aware.
-func clp(index: int) -> int:
-	return clamp(index, 0, control_points.size() - 1)
+static func clp(index: int, size: int) -> int:
+	return clamp(index, 0, size - 1)
 	# if index < 0:
 	# 	return 0
 	# elif index >= control_points.size():
@@ -70,7 +58,7 @@ func clp(index: int) -> int:
 	# 	return index
 
 
-func interpolate_one_point(
+static func interpolate_one_point(
 	p0: Vector2,
 	p1: Vector2,
 	p2: Vector2,
@@ -91,11 +79,11 @@ func interpolate_one_point(
 	return interpolate_one_layer(b1, b2, t1, t2, t)
 
 
-func interpolate_one_layer(p0: Vector2, p1: Vector2, t0: float, t1: float, t: float) -> Vector2:
+static func interpolate_one_layer(p0: Vector2, p1: Vector2, t0: float, t1: float, t: float) -> Vector2:
 	if basically_equal(p0, p1):
 		return p0
 	return p0 * ((t1 - t) / (t1 - t0)) + p1 * ((t - t0) / (t1 - t0))
 
 
-func basically_equal(a: Vector2, b: Vector2) -> bool:
+static func basically_equal(a: Vector2, b: Vector2) -> bool:
 	return a.distance_to(b) < 0.1

@@ -183,9 +183,9 @@ func apply_sticker_constraints(sticker: Sticker, trafo: Transform2D):
 
 
 ## Creates an edge between the two vertices.
-func create_edge(left: Vertex, right: Vertex) -> Edge:
+func create_edge(left: Vertex, right: Vertex, skeleton: PackedVector2Array = $EdgeGenerator.random_line()) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
-	edge.set_skeleton($EdgeGenerator.random_line())
+	edge.set_skeleton(skeleton)
 	edge.set_focused(false, true)  # force all edges in non-focused mode
 	edge.captured_hover_event.connect(handle_hover_event)
 	camera.zoom_changed.connect(edge.on_zoom_change)

@@ -10,6 +10,10 @@ class_name Edge extends PuzzleObject
 @export var outline_width: float = 10.0
 @export var	collider_width: float = 16.0
 
+## Number of samples of the interpolated curve
+@export var samples: int = 128
+
+
 ## Points of the edge skeleton (local coordinates)
 ## Skeleton points are normalized in local coordinates such that the
 ## left vertex is mapped to (0,0) and the right vertex to (100, 0).
@@ -17,6 +21,9 @@ var skeleton: PackedVector2Array
 
 ## Points of the smoothly interpolated edge (local coordinates)
 var points: PackedVector2Array
+
+## Points of the dashed guide line that directly connects the vertices
+var guide: PackedVector2Array = PackedVector2Array()
 
 ## Difference vector from left to right vertex of the edge (global coordinates)
 var baseline: Vector2 = Vector2(0, 0)
@@ -39,7 +46,7 @@ func make_straight():
 	var edge_shape = PackedVector2Array()
 	edge_shape.append(left)
 	edge_shape.append(right)
-	self.points = edge_shape
+	set_skeleton(edge_shape)
 	update()
 
 
@@ -55,9 +62,7 @@ func normalize_skeleton():
 
 ## Smooth the edge skeleton via a CatmulRomSpline
 func smooth_skeleton():
-	$CatmulRomSpline.refresh_samples(self.skeleton)
-	if $CatmulRomSpline.is_relevant:
-		self.points = $CatmulRomSpline.points.duplicate()
+	self.points = CatmulRomSpline.refresh_samples(self.skeleton, samples)
 
 ## Set a new skeleton for the edge
 func set_skeleton(new_points: PackedVector2Array):
@@ -167,6 +172,10 @@ func query_update_position():
 # At this point, all other nodes already exist, even though they may not be
 # members of the scene tree yet.
 func _ready():
+	# Initialize the guide line
+	for i in range(0, 26):
+		guide.append(Vector2(i * 4, 0))
+
 	normalize_skeleton()
 	left_vertex.position_changed.connect(query_update_position)
 	right_vertex.position_changed.connect(query_update_position)
@@ -174,12 +183,11 @@ func _ready():
 	update()
 
 func _draw():
+	# draw the actual line
 	draw_polyline(points, Color.WHITE, -1, false)
-	# if active or focused:
-	var multiline = PackedVector2Array()
-	for i in range(0, 26):
-		multiline.append(Vector2(i * 4, 0))
-	draw_multiline(multiline, Color(1.0, 1.0, 1.0, 0.8))
+	# draw the guide
+	draw_multiline(guide, Color(1.0, 1.0, 1.0, 0.8))
+	# draw the edge handle if activated
 
 ## Check for overlap with another edge.
 func _process(_delta):
