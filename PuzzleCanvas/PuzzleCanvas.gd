@@ -8,6 +8,7 @@ var edge_scene = preload("res://Edge/edge.tscn")
 
 var bbox: Rect2
 var edges = []
+var vertices = []
 var stickers = []
 
 #
@@ -262,6 +263,7 @@ func create_vertex(target_position: Vector2) -> Vertex:
 	vertex.captured_hover_event.connect(handle_hover_event)
 
 	$VertexContainer.add_child(vertex)
+	vertices.append(vertex)
 	return vertex
 
 
@@ -280,6 +282,7 @@ func delete_vertex(vertex: Vertex):
 
 	deselect_vertex(vertex)
 	unhover_object(vertex)
+	vertices.erase(vertex)
 	vertex.queue_free()
 
 

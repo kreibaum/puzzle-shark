@@ -13,6 +13,9 @@ func _input(_event):
 
 		# Reload everything going through serialization
 		var serialized = CanvasSerializer.serialize(canvas)
+
+		print(JSON.stringify(serialized))
+
 		CanvasSerializer.deserialize(canvas, serialized)
 		# Restart the current tool
 		pass
