@@ -7,7 +7,7 @@
 [ext_resource type="Script" path="res://UI/EdgeInspector.gd" id="7_ydjap"]
 [ext_resource type="Script" path="res://UI/StateMachine.gd" id="8_ac1sk"]
 [ext_resource type="Script" path="res://UI/StateGrid.gd" id="8_qgcry"]
-[ext_resource type="Script" path="res://ReloadDebugHotkey.gd" id="9_bafsd"]
+[ext_resource type="Script" path="res://GlobalHotkeyHandler.gd" id="9_cd06m"]
 [ext_resource type="Script" path="res://Sticker/StickerParser.gd" id="10_dkdjr"]
 
 [node name="Node2D" type="Node2D"]
@@ -114,7 +114,17 @@ ui_canvas = NodePath("../CanvasLayer")
 script = ExtResource("10_dkdjr")
 canvas = NodePath("../PuzzleCanvas")
 
-[node name="ReloadDebugHotkey" type="Node" parent="." node_paths=PackedStringArray("canvas", "state_machine")]
-script = ExtResource("9_bafsd")
+[node name="GlobalHotkeyHandler" type="Node" parent="." node_paths=PackedStringArray("canvas", "state_machine")]
+script = ExtResource("9_cd06m")
 canvas = NodePath("../PuzzleCanvas")
 state_machine = NodePath("../StateMachine")
+
+[node name="SaveFileDialog" type="FileDialog" parent="GlobalHotkeyHandler"]
+ok_button_text = "Save"
+access = 2
+
+[node name="LoadFileDialog" type="FileDialog" parent="GlobalHotkeyHandler"]
+title = "Open a File"
+ok_button_text = "Open"
+file_mode = 0
+access = 2

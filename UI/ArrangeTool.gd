@@ -11,11 +11,13 @@ var selection_box: SelectionBox = null
 ## The constrained mouse position in the last frame while we were dragging.
 var drag_position: Vector2 = Vector2.INF
 
+
 ## To select multiple vertices at once, you can add nodes to the selection set
 ## by shift clicking or shift dragging a selection box.
 ## Shift clicking a node can also remove it from the selection set.
 func is_additive_selection():
 	return Input.is_key_pressed(KEY_SHIFT)
+
 
 #
 # Vertex actions
@@ -25,6 +27,7 @@ func is_additive_selection():
 # - additive / subtractive selection is enabled by CTRL
 # - move vertices (alone or as in group)
 #
+
 
 func remember_drag_start_vertex(vertex: Vertex):
 	drag_position = canvas.get_global_mouse_position()
@@ -97,13 +100,14 @@ func handle_motion_vertex(vertex: Vertex):
 	# if we drag the vertex onto a sticker for anchoring purposes
 	# set_input_as_handled()
 
+
 ## Handles release of the left mouse button.
 func handle_release_vertex(vertex: Vertex):
 	if vertex != null and drag_position == Vector2.INF:
-		canvas.deselect_all()	
+		canvas.deselect_all()
 		canvas.select_vertex(vertex)
 		source_object = null
-		
+
 	elif drag_position != Vector2.INF:
 		handle_motion_vertex(vertex)
 		drag_position = Vector2.INF
@@ -111,6 +115,7 @@ func handle_release_vertex(vertex: Vertex):
 		for selected in canvas.selected_vertices:
 			selected.unstore_position()
 	set_input_as_handled()
+
 
 func handle_interrupt_vertex(_vertex: Vertex):
 	if drag_position != Vector2.INF:
@@ -121,6 +126,7 @@ func handle_interrupt_vertex(_vertex: Vertex):
 			selected.restore_position()
 	set_input_as_handled()
 
+
 #
 # Edge actions
 #
@@ -129,6 +135,7 @@ func handle_interrupt_vertex(_vertex: Vertex):
 # - additive / subtractive selection is enabled by CTRL
 # - move vertices (alone or as in group)
 #
+
 
 func handle_click_edge(edge: Edge):
 	# Select vertices
@@ -144,6 +151,7 @@ func handle_click_edge(edge: Edge):
 		selected.store_position()
 	set_input_as_handled()
 
+
 func handle_motion_edge(_edge: Edge):
 	var mouse_position = canvas.get_global_mouse_position()
 	var mouse_position_constrained = canvas.project_bbox(mouse_position)
@@ -152,6 +160,7 @@ func handle_motion_edge(_edge: Edge):
 	drag_position = mouse_position_constrained
 	set_input_as_handled()
 
+
 func handle_release_edge(edge: Edge):
 	handle_motion_edge(edge)
 	drag_position = Vector2.INF
@@ -159,7 +168,8 @@ func handle_release_edge(edge: Edge):
 	for selected in canvas.selected_vertices:
 		selected.unstore_position()
 	set_input_as_handled()
-	
+
+
 func handle_interrupt_edge(_edge: Edge):
 	if drag_position != Vector2.INF:
 		drag_position = Vector2.INF
@@ -178,6 +188,7 @@ func handle_interrupt_edge(_edge: Edge):
 # - move vertices (alone or as group)
 #
 
+
 func handle_click_sticker(sticker: Sticker):
 	canvas.deselect_all()
 	canvas.select_sticker(sticker)
@@ -185,18 +196,21 @@ func handle_click_sticker(sticker: Sticker):
 	drag_position = canvas.get_global_mouse_position()
 	set_input_as_handled()
 
+
 func handle_motion_sticker(sticker: Sticker):
 	var new_position = canvas.get_global_mouse_position()
 	var delta = new_position - drag_position
 	canvas.move_sticker_by(sticker, delta)
 	drag_position = new_position
 	set_input_as_handled()
-	
+
+
 func handle_release_sticker(sticker: Sticker):
 	drag_position = Vector2.INF
 	source_object = null
 	sticker.unstore_position()
 	set_input_as_handled()
+
 
 func handle_interrupt_sticker(sticker: Sticker):
 	sticker.restore_position()
@@ -207,13 +221,14 @@ func handle_interrupt_sticker(sticker: Sticker):
 # Rotations and scalings of Stickers and edges
 #
 
+
 ## Returns the object that is currently affected by rotations
 func get_rotation_object():
 	# If an object is focused, take it
 	var object = canvas.get_focused_object()
 	if object != null:
 		return object
-	# If no object is focused, search for either a selected sticker or 
+	# If no object is focused, search for either a selected sticker or
 	# a single selected edge
 	else:
 		var edges = canvas.get_selected_edges()
@@ -224,9 +239,11 @@ func get_rotation_object():
 		else:
 			return
 
+
 ## Returns the object that is currently affected by scalings
 func get_scale_object():
 	return get_rotation_object()
+
 
 #
 # Rectangle selection
@@ -237,6 +254,7 @@ func get_scale_object():
 # - initialized if user is not clicking on any other selectable object
 #
 
+
 func handle_click_box():
 	if !is_additive_selection():
 		canvas.deselect_all()
@@ -246,10 +264,12 @@ func handle_click_box():
 	selection_box.start_selection()
 	set_input_as_handled()
 
+
 func handle_motion_box():
 	if selection_box != null:
 		selection_box.move_selection()
 	set_input_as_handled()
+
 
 func handle_release_box():
 	if selection_box != null:
@@ -261,6 +281,7 @@ func handle_release_box():
 		selection_box.queue_free()
 		selection_box = null
 	set_input_as_handled()
+
 
 func handle_interrupt_box():
 	if selection_box != null:
@@ -294,19 +315,19 @@ func handle_anchor(object: PuzzleObject, backwards = false):
 			canvas.selected_sticker.cycle_anchor_mode([], backwards)
 	set_input_as_handled()
 
+
 func input(event):
 	if event is InputEventMouseButton:
-
 		# A right click when we are not currently involved in any actions means
 		# that we cycle through anchor modes
-		var idle = (drag_position == Vector2.INF and selection_box == null)
+		var idle = drag_position == Vector2.INF and selection_box == null
 		if Input.is_action_just_pressed("RightClick") and idle:
 			var object = canvas.get_focused_object()
 			if Input.is_key_pressed(KEY_SHIFT):
 				handle_anchor(object, true)
 			else:
 				handle_anchor(object, false)
-		
+
 		# A left click means that we directly select new objects, start draggiing,
 		# draw a rectangle selection box
 		elif Input.is_action_just_pressed("LeftClick"):
@@ -423,7 +444,8 @@ func input(event):
 			canvas.scale_sticker(source_object, 1 / 1.1)
 		set_input_as_handled()
 
-	elif Input.is_action_just_pressed("SavePuzzle"):
+	# TODO: This really shouldn't be in the ArrangeTool.
+	elif Input.is_action_just_pressed("ExportPuzzle"):
 		print("Saving to file...")
 		print(OS.get_user_data_dir())
 		canvas.saveToFile()
