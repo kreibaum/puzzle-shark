@@ -107,3 +107,55 @@ static func deserialize(canvas: PuzzleCanvas, json: Dictionary):
 		var right = canvas.vertices[edge["right"]]
 		var skeleton = deserialize_vector2array(edge["skeleton"])
 		canvas.create_edge(left, right, skeleton)
+
+
+### SVG-Export
+
+
+## Turns the current state of the canvas into an svg file. Returns a rope that
+## needs to be stored to a file. A rope is an array of strings.
+static func exportToSvg(canvas: PuzzleCanvas) -> Array:
+	var rope = []
+	rope.append('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
+	(
+		rope
+		. append(
+			'<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n'
+		)
+	)
+	rope.append('<svg xmlns="http://www.w3.org/2000/svg" version="1.1">\n')
+
+	for edge in canvas.edges:
+		# Svg path format: M x1 y1 L x2 y2 L x3 y3 ...
+		rope.append(
+			'<path d="' + edge_path(edge) + '" stroke="black" stroke-width="2" fill="none"/>\n'
+		)
+
+	for sticker in canvas.stickers:
+		print("Sticker: " + str(sticker))
+		for line in sticker.lines:
+			print("Line: " + str(line))
+			rope.append(
+				(
+					'<path d="'
+					+ array2d_path(sticker.transform * line.points)
+					+ '" stroke="black" stroke-width="2" fill="none"/>\n'
+				)
+			)
+
+	rope.append("</svg>")
+
+	return rope
+
+
+static func edge_path(edge: Edge) -> String:
+	return array2d_path(edge.get_shape_points())
+
+
+static func array2d_path(array: Array) -> String:
+	var svg_path = "M"
+	# M is implicitly followed by L. So we don't have to include any L commands.
+	for point in array:
+		svg_path += " " + str(point.x) + " " + str(point.y)
+
+	return svg_path

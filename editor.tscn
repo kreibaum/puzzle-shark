@@ -128,3 +128,8 @@ title = "Open a File"
 ok_button_text = "Open"
 file_mode = 0
 access = 2
+
+[node name="ExportFileDialog" type="FileDialog" parent="GlobalHotkeyHandler"]
+title = "Export a Vector Graphic"
+ok_button_text = "Export"
+access = 2

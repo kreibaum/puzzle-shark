@@ -427,54 +427,6 @@ func deselect_all():
 	deselect_sticker()
 
 
-## Save the current puzzle canvas to an svg file
-func saveToFile():
-	var file = FileAccess.open("user://jigsaw.svg", FileAccess.WRITE)
-	file.store_string('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
-	(
-		file
-		. store_string(
-			'<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n'
-		)
-	)
-	file.store_string('<svg xmlns="http://www.w3.org/2000/svg" version="1.1">\n')
-
-	for edge in edges:
-		# Svg path format: M x1 y1 L x2 y2 L x3 y3 ...
-		file.store_string(
-			'<path d="' + edge_path(edge) + '" stroke="black" stroke-width="2" fill="none"/>\n'
-		)
-
-	for sticker in stickers:
-		print("Sticker: " + str(sticker))
-		for line in sticker.lines:
-			print("Line: " + str(line))
-			file.store_string(
-				(
-					'<path d="'
-					+ array2d_path(sticker.transform * line.points)
-					+ '" stroke="black" stroke-width="2" fill="none"/>\n'
-				)
-			)
-
-	file.store_string("</svg>")
-
-	file.close()
-
-
-func edge_path(edge: Edge) -> String:
-	return array2d_path(edge.get_shape_points())
-
-
-func array2d_path(array: Array) -> String:
-	var svg_path = "M"
-	# M is implicitly followed by L. So we don't have to include any L commands.
-	for point in array:
-		svg_path += " " + str(point.x) + " " + str(point.y)
-
-	return svg_path
-
-
 ## Initialize the Puzzle Canvas on entering the scene tree
 func _ready():
 	# By default, the

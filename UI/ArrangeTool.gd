@@ -444,12 +444,6 @@ func input(event):
 			canvas.scale_sticker(source_object, 1 / 1.1)
 		set_input_as_handled()
 
-	# TODO: This really shouldn't be in the ArrangeTool.
-	elif Input.is_action_just_pressed("ExportPuzzle"):
-		print("Saving to file...")
-		print(OS.get_user_data_dir())
-		canvas.saveToFile()
-
 	# Delete all selected vertices
 	if Input.is_action_just_pressed("Delete"):
 		var keys = canvas.selected_vertices.keys()
