@@ -25,13 +25,20 @@ signal focus_changed
 
 func clear():
 	reset_hover_filter()
-	for edge in edges:
+	# This needs to duplicate the list, because otherwise we would delete from
+	# a list while iterating over it.
+	for edge in edges.duplicate():
 		delete_edge(edge)
 
+	# This work without a .duplicate() call, because we only queue_free the
+	# vertices which removes them from the scene tree later. This means we don't
+	# actually invalidate the iterator.
 	for vertex in $VertexContainer.get_children():
 		delete_vertex(vertex)
 
-	for sticker in stickers:
+	# This needs to duplicate the list, because otherwise we would delete from
+	# a list while iterating over it.
+	for sticker in stickers.duplicate():
 		delete_sticker(sticker)
 
 
@@ -183,7 +190,9 @@ func apply_sticker_constraints(sticker: Sticker, trafo: Transform2D):
 
 
 ## Creates an edge between the two vertices.
-func create_edge(left: Vertex, right: Vertex, skeleton: PackedVector2Array = $EdgeGenerator.random_line()) -> Edge:
+func create_edge(
+	left: Vertex, right: Vertex, skeleton: PackedVector2Array = $EdgeGenerator.random_line()
+) -> Edge:
 	var edge: Edge = edge_scene.instantiate()
 	edge.set_skeleton(skeleton)
 	edge.set_focused(false, true)  # force all edges in non-focused mode

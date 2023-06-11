@@ -47,12 +47,20 @@ func load_sticker(filename: String) -> Sticker:
 		return
 
 	print("Loaded sticker: ", data["name"])
+
+	return build_sticker(data)
+
+
+## Parses the sticker json and svg content into a Sticker.
+## This part is also reused when loading and saving files.
+## Stickers are always "embedded" into the .shark file and not referenced.
+static func build_sticker(data: Dictionary) -> Sticker:
 	var sticker = Sticker.new()
 	for line in data["lines"]:
 		for parsed_line in parse_line(line):
 			print(parsed_line[0], parsed_line[-1])
 			sticker.add_polyline(parsed_line, line["sticky"])
-
+	sticker.set_source_data(data)
 	return sticker
 
 
@@ -64,7 +72,7 @@ func load_sticker(filename: String) -> Sticker:
 ## Please refer to
 ## https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d#path_commands
 ## for more information on the commands.
-func parse_line(line):
+static func parse_line(line):
 	var d = line["d"]
 
 	var pen_position = Vector2.ZERO
@@ -143,7 +151,7 @@ func parse_line(line):
 	return all_lines
 
 
-func parse_vector2(token: String):
+static func parse_vector2(token: String):
 	var parts = token.split(",")
 	if parts.size() != 2:
 		print("Error: Invalid vector2: ", token)

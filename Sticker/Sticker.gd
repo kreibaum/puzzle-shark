@@ -9,6 +9,14 @@ class_name Sticker extends PuzzleObject
 ##
 ## Stickers are loaded from a json file. The json file is a list of polylines.
 
+## Original data of the sticker file that can be used to recreate the sticker
+var source_data: Dictionary
+
+
+func set_source_data(data: Dictionary):
+	source_data = data
+
+
 ## Dictionary with Line2D objects as keys and collider objects as values.
 ## If the collider is null, the polyline is not sticky.
 var lines = {}
@@ -24,18 +32,23 @@ var transform_target: Transform2D = transform
 var transform_start: Transform2D
 var transform_tween: Tween
 
+
 func set_transform_hard(trafo: Transform2D):
-	if transform_tween: transform_tween.kill()
+	if transform_tween:
+		transform_tween.kill()
 	transform_target = trafo
 	transform = trafo
 	position_changed.emit()
 
+
 func set_transform_smooth(trafo: Transform2D):
-	if transform_tween: transform_tween.kill()
+	if transform_tween:
+		transform_tween.kill()
 	transform_start = transform
 	transform_target = trafo
 	transform_tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
 	transform_tween.tween_method(interpolate_transform, 0.0, 1.0, 0.5)
+
 
 func interpolate_transform(t: float):
 	transform = transform_start.interpolate_with(transform_target, t)
@@ -45,16 +58,14 @@ func interpolate_transform(t: float):
 func anchor_vertex(vertex: Vertex):
 	anchored_vertices.append(vertex)
 
+
 func unanchor_vertex(vertex: Vertex):
 	var index = anchored_vertices.find(vertex)
 	anchored_vertices.remove_at(index)
 
 
 ## Anchor options of a sticker
-enum ANCHOR {
-	FREE = 0,
-	CANVAS = 1
-}
+enum ANCHOR { FREE = 0, CANVAS = 1 }
 
 var anchor: ANCHOR
 
@@ -66,10 +77,12 @@ var anchor: ANCHOR
 ## of the drawn lines
 var camera_zoom: float = 1.0
 
+
 ## Get the center of the sticker. It equals the center of the sticker's bounding
 ## box in global coordinates
 func get_center():
 	return self.transform * bbox.get_center()
+
 
 ## Add a polyline to the sticker
 func add_polyline(points: PackedVector2Array, sticky: bool):
@@ -100,6 +113,7 @@ func add_polyline(points: PackedVector2Array, sticky: bool):
 		lines[line] = null
 	queue_redraw()
 
+
 ## Adjust the collision polygon of a collider to a polyline
 func update_collider(collider: CollisionPolygon2D, points: PackedVector2Array):
 	var thickness = collider_width / self.scale.x / 2
@@ -113,6 +127,7 @@ func update_collider(collider: CollisionPolygon2D, points: PackedVector2Array):
 	elif len(polys) == 2:
 		collider.polygon = polys[0]
 
+
 ## Update function that should be called whenever the geometry / transform
 ## of the sticker changes
 func update():
@@ -121,7 +136,7 @@ func update():
 		var collider = lines[line]
 		if collider != null:
 			update_collider(collider, line.points)
-	
+
 
 ## Finds the nearest point on the sticker to the given point.
 ## This function is very unoptimized right now but this is going to be an
@@ -157,15 +172,16 @@ func find_nearest_sticky_point(point: Vector2) -> Vector2:
 		return point
 
 
-
 func _ready():
 	position_changed.connect(update)
 	update()
 	update_line_color()
 
+
 func _draw():
 	for line in lines:
 		draw_polyline(line.points, Color("3d3d3d"))
+
 
 func set_anchor_mode(new_anchor: ANCHOR, _context: Array = []) -> bool:
 	if new_anchor == anchor:
@@ -180,17 +196,20 @@ func set_anchor_mode(new_anchor: ANCHOR, _context: Array = []) -> bool:
 				line.self_modulate = Color(0.65, 0.65, 0.65)
 		return true
 
+
 # TODO: This should become part of the PuzzleObject interface
 func cycle_anchor_mode(context: Array = [], _backwards = false):
 	var next_mode = (anchor + 1) % 2 as ANCHOR
 	set_anchor_mode(next_mode, context)
 	return
 
+
 func apply_anchor_constraint(transformation):
 	if anchor == ANCHOR.FREE:
 		return transformation
 	else:
 		return self.transform
+
 
 ## Adapts the line color according to the current sticker state
 func update_line_color():
@@ -211,6 +230,7 @@ func update_line_color():
 		for line in lines:
 			line.default_color = Color.LIGHT_GRAY
 
+
 func _set_virtual(value):
 	if value:
 		self.modulate = Color(1, 1, 1, 0.75)
@@ -225,16 +245,20 @@ func _set_virtual(value):
 			if collider != null:
 				collider.disabled = false
 
+
 func _set_focused(_value):
 	update_line_color()
 
+
 func _set_active(_value):
 	update_line_color()
+
 
 func on_zoom_change(zoom: Vector2):
 	camera_zoom = zoom.x
 	for line in lines:
 		line.width = line_width / camera_zoom / scale.x
+
 
 func project_onto_object(point: Vector2):
 	return find_nearest_sticky_point(point)

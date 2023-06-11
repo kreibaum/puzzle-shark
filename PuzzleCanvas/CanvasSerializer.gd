@@ -5,10 +5,14 @@ class_name CanvasSerializer extends Object
 ## This means we also store some ephemeral state like the current selection.
 
 
+static func serialize_vector2(vector: Vector2) -> Dictionary:
+	return {"x": vector.x, "y": vector.y}
+
+
 static func serialize_vector2array(array: PackedVector2Array) -> Array:
 	var points = []
 	for point in array:
-		points.append({"x": point.x, "y": point.y})
+		points.append(serialize_vector2(point))
 	return points
 
 
@@ -22,29 +26,53 @@ static func deserialize_vector2array(points: Array) -> PackedVector2Array:
 ## Serialize the canvas to a json object.
 ## { vertices : [ { x: 23.4, y: 77.3 } ] }
 static func serialize(canvas: PuzzleCanvas) -> Dictionary:
-	var indices = {}
+	# In the json, the edges must refer to the vertices by their index.
+	# This is why we need to create a mapping from vertices to indices.
+	# The same is true for stickers.
+	var vertex_indices = {}
+	var sticker_indices = {}
 	var json = {}
 
+	json["stickers"] = []
 	json["vertices"] = []
 	json["edges"] = []
 
-	var index = 0
+	var sticker_index = 0
+	for sticker in canvas.stickers:
+		var source_data = sticker.source_data
+
+		# The transformation matrix is made up of the origin, x and y vectors.
+		var sticker_serialized = {
+			"source_data": source_data,
+			"origin": serialize_vector2(sticker.transform.origin),
+			"x": serialize_vector2(sticker.transform.x),
+			"y": serialize_vector2(sticker.transform.y),
+		}
+		json["stickers"].append(sticker_serialized)
+
+		sticker_indices[sticker] = sticker_index
+		sticker_index += 1
+
+	var vertex_index = 0
 	for vertex in canvas.vertices:
-		# TODO: stickerId must be serialized, after we got stickers
 		var x = vertex.position.x
 		var y = vertex.position.y
 		var anchor = vertex.anchor
 
-		json["vertices"].append({"x": x, "y": y, "anchor": vertex.anchor})
-		indices[vertex] = index
-		index += 1
+		var vertex_serialized = {"x": x, "y": y, "anchor": vertex.anchor}
+		if anchor == Vertex.ANCHOR.STICKER:
+			vertex_serialized["sticker_id"] = sticker_indices[vertex.anchor_sticker]
+
+		json["vertices"].append(vertex_serialized)
+		vertex_indices[vertex] = vertex_index
+		vertex_index += 1
 
 	for edge in canvas.edges:
-		var left = indices[edge.left_vertex]
-		var right = indices[edge.right_vertex]
+		var left = vertex_indices[edge.left_vertex]
+		var right = vertex_indices[edge.right_vertex]
 		var skeleton = serialize_vector2array(edge.skeleton)
 		json["edges"].append({"left": left, "right": right, "skeleton": skeleton})
-	
+
 	return json
 
 
@@ -52,10 +80,27 @@ static func serialize(canvas: PuzzleCanvas) -> Dictionary:
 static func deserialize(canvas: PuzzleCanvas, json: Dictionary):
 	canvas.clear()
 
+	print("Sticker count: ", len(json["stickers"]))
+	for sticker in json["stickers"]:
+		var source_data = sticker["source_data"]
+		var origin = Vector2(sticker["origin"]["x"], sticker["origin"]["y"])
+		var x = Vector2(sticker["x"]["x"], sticker["x"]["y"])
+		var y = Vector2(sticker["y"]["x"], sticker["y"]["y"])
+		var transform = Transform2D(x, y, origin)
+		var canvas_sticker = StickerParser.build_sticker(source_data)
+		print("deserialized sticker: ", canvas_sticker.name)
+		canvas.add_sticker(canvas_sticker)
+		canvas_sticker.set_transform_hard(transform)
+
 	for vertex in json["vertices"]:
 		var canvas_vertex = canvas.create_vertex(Vector2(vertex["x"], vertex["y"]))
-		canvas_vertex.set_anchor_mode(vertex["anchor"])
-		
+		# To attack vertices to stickers they are assigned to, we need to put
+		# the Sticker object into the context.
+		var context = []
+		if "sticker_id" in vertex:
+			var sticker = canvas.stickers[vertex["sticker_id"]]
+			context.append(sticker)
+		canvas_vertex.set_anchor_mode(vertex["anchor"], context)
 
 	for edge in json["edges"]:
 		var left = canvas.vertices[edge["left"]]
